@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:lucide.dev)",
+      "Skill(git:commit)",
+      "WebSearch"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "context7",
+    "sequential-thinking"
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/slack-notify.js Notification"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/kakao-notify.js Notification"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/slack-notify.js Stop"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/kakao-notify.js Stop"
+          }
+        ]
+      }
+    ]
+  }
+}
