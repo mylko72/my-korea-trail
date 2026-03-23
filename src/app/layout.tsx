@@ -43,8 +43,12 @@ const geistMono = Geist_Mono({
  * Next.js가 자동으로 <head> 태그 안에 삽입합니다.
  */
 export const metadata: Metadata = {
-  title: "Frontend Starter Kit",
-  description: "React + Next.js + TailwindCSS + shadcn/ui 기반 프론트엔드 스타터킷",
+  title: {
+    default: "코리아 둘레길 기록 블로그",
+    template: "%s | 코리아 둘레길",
+  },
+  description: "Notion CMS 기반 코리아 둘레길 도보 여행 기록 블로그. 동해안, 남해안, 서해안, DMZ, 지리산 구간 여행 기록을 공유합니다.",
+  keywords: ["코리아 둘레길", "둘레길", "도보 여행", "트레킹", "한국 여행"],
 };
 
 /**

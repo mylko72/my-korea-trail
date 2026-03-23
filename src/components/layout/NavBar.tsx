@@ -18,20 +18,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, Menu, X, Code2 } from "lucide-react";
+import { Moon, Sun, Menu, X, Footprints } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 
 /**
  * 네비게이션 링크 목록
- * 새 페이지를 추가할 때 이 배열에 항목을 추가하세요.
+ * 새 카테고리 페이지를 추가할 때 이 배열에 항목을 추가하세요.
  * href는 Next.js 라우터 경로와 일치해야 합니다.
  */
 const navLinks = [
   { href: "/", label: "홈" },
-  { href: "/components", label: "컴포넌트" },
-  { href: "/api-docs", label: "API 문서" },
+  { href: "/east-coast", label: "동해안" },
+  { href: "/south-coast", label: "남해안" },
+  { href: "/west-coast", label: "서해안" },
+  { href: "/dmz", label: "DMZ" },
+  { href: "/jirisan", label: "지리산" },
 ];
 
 /**
@@ -84,8 +87,8 @@ export default function NavBar() {
 
         {/* 로고: 홈으로 이동하는 링크입니다 */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
-          <Code2 className="h-6 w-6 text-primary" />
-          <span>Starter Kit</span>
+          <Footprints className="h-6 w-6 text-primary" />
+          <span>코리아 둘레길</span>
         </Link>
 
         {/* 데스크톱 네비게이션: md(768px) 이상에서만 표시됩니다 */}
