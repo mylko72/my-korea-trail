@@ -16,7 +16,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAllCategories, getPostsByCategory } from "@/lib/notion";
 import { slugToCategory, categoryToSlug, formatDistance, formatDuration, formatShortDate } from "@/lib/utils";
-import type { TrailCategory } from "@/lib/types";
+import type { TrailCategory, TrailPost } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Route } from "lucide-react";
@@ -79,7 +79,13 @@ export default async function CategoryPage({
   }
 
   // 해당 카테고리의 게시글 목록을 Notion에서 가져옵니다
-  const posts = await getPostsByCategory(categoryName);
+  // Notion API 미설정 또는 에러 시 빈 배열로 폴백합니다
+  let posts: TrailPost[] = [];
+  try {
+    posts = await getPostsByCategory(categoryName);
+  } catch {
+    // Notion API 에러 시 빈 목록으로 안전하게 렌더링합니다
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
