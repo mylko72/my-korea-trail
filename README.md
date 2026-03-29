@@ -51,16 +51,71 @@ Notion을 CMS로 활용하여 코리아 둘레길 코스 정보를 자동으로 
 | **Google Maps API** | Latest | 지도 표시 및 마커 관리 |
 | **@react-google-maps/api** | Latest | React Google Maps 통합 |
 
-## 🚀 시작하기
+## 🚀 빠른 시작
 
-### 필요 조건
+### 환경 변수 설정 (.env.local)
 
-- Node.js 18.17 이상
-- npm / yarn / pnpm / bun
-- Notion API 키 (개발자 콘솔에서 발급)
-- Google Maps API 키 (Google Cloud Console에서 발급)
+프로젝트 루트에 `.env.local` 파일을 생성하고 다음 변수들을 설정합니다.
 
-### 설치 및 실행
+#### Notion API 설정
+
+**1. NOTION_API_TOKEN** (서버 전용, 필수)
+
+Notion 통합(Integration)을 생성하여 토큰을 발급합니다.
+
+발급 방법:
+1. https://www.notion.so/my-integrations 접속
+2. `+ New integration` 클릭
+3. 이름 입력 (예: "코리아 둘레길 블로그") 후 `Submit`
+4. `Internal Integration Token` 값 복사
+5. Notion 데이터베이스 페이지에서 `...` 메뉴 → `Add connections` → 생성한 통합 추가
+
+> 절대 공개하지 마세요. `.gitignore`에 등재되어 커밋되지 않습니다.
+
+**2. NOTION_DATABASE_ID** (서버 전용, 필수)
+
+코스 데이터가 저장된 Notion 데이터베이스 ID를 입력합니다.
+
+추출 방법:
+- 데이터베이스 URL 형식: `https://www.notion.so/{workspace}/{DATABASE_ID}?v=...`
+- URL에서 `?v=` 앞의 32자리 문자열이 데이터베이스 ID입니다.
+- 예: URL이 `https://www.notion.so/mysite/abc123def456ghi789jkl000mno111?v=...` 이면
+  `NOTION_DATABASE_ID=abc123def456ghi789jkl000mno111`
+
+#### Google Maps API 설정
+
+**3. NEXT_PUBLIC_GOOGLE_MAPS_API_KEY** (클라이언트 노출 가능, 필수)
+
+Google Cloud Console에서 Maps JavaScript API 키를 발급합니다.
+
+발급 방법:
+1. https://console.cloud.google.com 접속
+2. 새 프로젝트 생성 또는 기존 프로젝트 선택
+3. `API 및 서비스` → `라이브러리` → `Maps JavaScript API` 활성화
+4. `사용자 인증 정보` → `+ 사용자 인증 정보 만들기` → `API 키`
+5. 보안 설정: `HTTP 리퍼러` 제한 추가
+   - 로컬 개발: `http://localhost:3000/*`
+   - 프로덕션: Vercel 도메인 추가 필수
+6. 과금 방지: `할당량` 탭에서 일일 요청 한도 설정 권장
+
+#### .env.local 예시
+
+```bash
+# Notion API (서버 전용 - 절대 NEXT_PUBLIC_ 접두사 붙이지 말 것)
+NOTION_API_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Google Maps JavaScript API (클라이언트 사이드 사용)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> **주의사항**
+> - `.env.local`은 `.gitignore`에 등재되어 커밋되지 않습니다.
+> - 토큰 유출 시 즉시 Notion/Google Cloud에서 재발급하세요.
+> - 로컬 개발 중에는 환경 변수 없이도 Mock 데이터로 UI 테스트가 가능합니다.
+> - Vercel 배포 시 Vercel 대시보드 `Settings → Environment Variables`에도 동일하게 등록해야 합니다.
+
+### 로컬 개발 시작
 
 ```bash
 # 1. 저장소 클론
@@ -70,30 +125,30 @@ cd notion-cms-project
 # 2. 의존성 설치
 npm install
 
-# 3. 환경 변수 설정
-# .env.local 파일 생성 후 아래 항목 추가
-# NEXT_PUBLIC_NOTION_DATABASE_ID=your_database_id
-# NOTION_API_KEY=your_notion_api_key
-# NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+# 3. .env.local 파일 생성 및 환경 변수 설정
+# (위 가이드 참고)
 
 # 4. 개발 서버 실행
 npm run dev
 
-# 5. 브라우저에서 확인
+# 5. 브라우저에서 열기
 # http://localhost:3000
 ```
 
 ### 빌드 및 배포
 
 ```bash
-# 프로덕션 빌드
+# 빌드 검증 (TypeScript 타입 체크 + 정적 생성)
 npm run build
 
-# 빌드된 앱 실행
+# 프로덕션 서버 실행
 npm run start
 
-# Vercel 배포
-# vercel 명령어 또는 GitHub 연동으로 자동 배포
+# ESLint 코드 검사
+npm run lint
+
+# Vercel 배포 (GitHub 연동 시 main 브랜치 push로 자동 배포)
+# vercel 명령어로 수동 배포도 가능
 ```
 
 ## 📁 프로젝트 구조
@@ -101,26 +156,32 @@ npm run start
 ```
 src/
 ├── app/
-│   ├── page.tsx              # 홈 페이지 (코스 목록 + 검색)
-│   ├── [category]/
-│   │   └── page.tsx          # 카테고리 페이지 (카테고리별 코스 + 필터)
-│   ├── [category]/[id]/
-│   │   └── page.tsx          # 코스 상세 페이지 (지도 + 정보)
-│   ├── layout.tsx            # 루트 레이아웃 (NavBar 포함)
-│   └── globals.css           # 전역 스타일
+│   ├── page.tsx                    # 홈 페이지 (코스 목록 + 검색)
+│   ├── loading.tsx                 # 홈 페이지 로딩 UI
+│   ├── error.tsx                   # 에러 바운더리
+│   ├── not-found.tsx               # 404 페이지
+│   ├── layout.tsx                  # 루트 레이아웃 (NavBar, Footer 포함)
+│   ├── globals.css                 # 전역 스타일
+│   └── [category]/
+│       ├── page.tsx                # 카테고리 페이지 (카테고리별 코스 + 필터)
+│       ├── loading.tsx             # 카테고리 로딩 UI
+│       └── [slug]/
+│           ├── page.tsx            # 코스 상세 페이지 (지도 + 정보 + 이미지)
+│           └── loading.tsx         # 상세 페이지 로딩 UI
 │
 ├── components/
 │   ├── layout/
-│   │   ├── NavBar.tsx        # 네비게이션 바
-│   │   └── Footer.tsx        # 푸터
-│   └── ui/                   # shadcn/ui 컴포넌트
+│   │   ├── NavBar.tsx              # 반응형 네비게이션 바 (다크모드 토글)
+│   │   └── Footer.tsx              # 푸터
+│   └── ui/                         # shadcn/ui 컴포넌트
 │
-├── lib/
-│   ├── notionApi.ts          # Notion API 클라이언트
-│   └── utils.ts              # 유틸리티 함수
+├── contexts/
+│   └── ThemeContext.tsx             # 다크/라이트 모드 Context
 │
-└── types/
-    └── index.ts              # TypeScript 타입 정의
+└── lib/
+    ├── types.ts                    # TrailPost, TrailCategory 등 타입 정의
+    ├── notion.ts                   # Notion API 클라이언트 (서버 전용)
+    └── utils.ts                    # 날짜, 거리, 카테고리 포맷팅 함수
 ```
 
 ## 📋 구현 단계
@@ -166,15 +227,23 @@ src/
 
 ## 🔐 환경 변수
 
-`.env.local` 파일에 다음 항목을 추가하세요:
+| 변수명 | 노출 범위 | 설명 | 필수 |
+|--------|----------|------|------|
+| `NOTION_API_TOKEN` | 서버 전용 | Notion 통합 토큰 | 필수 |
+| `NOTION_DATABASE_ID` | 서버 전용 | 코스 데이터 DB ID | 필수 |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | 클라이언트 노출 | Google Maps JavaScript API 키 | 필수 |
+
+자세한 발급 및 설정 방법은 [빠른 시작](#-빠른-시작) 섹션을 참고하세요.
+
+`.env.local` 예시:
 
 ```env
-# Notion
-NEXT_PUBLIC_NOTION_DATABASE_ID=your_database_id
-NOTION_API_KEY=your_api_key
+# Notion API (서버 전용)
+NOTION_API_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-# Google Maps
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+# Google Maps (클라이언트 사이드)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ## 📚 참고 문서
