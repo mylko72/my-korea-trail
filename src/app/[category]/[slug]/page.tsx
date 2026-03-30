@@ -19,6 +19,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { getAllPosts, getPostBySlug } from "@/lib/notion";
 import { MOCK_POSTS, filterPostsByCategory } from "@/lib/mockData";
 import {
@@ -28,12 +29,18 @@ import {
   formatDistance,
   formatDuration,
 } from "@/lib/utils";
+import {
+  generateTrailMetadata,
+  generateBreadcrumbListSchema,
+  generateArticleSchema,
+} from "@/lib/metadata";
 import type { TrailCategory, TrailPost } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PrevNextNavigation } from "@/components/trail/PrevNextNavigation";
+import { ShareButton } from "@/components/trail/share-button";
 import {
   ArrowLeft,
   Calendar,
@@ -49,6 +56,13 @@ import {
 // Mock 본문 콘텐츠 (Phase 3: UI 개발용)
 // Phase 5에서 실제 Notion 블록 콘텐츠로 대체됩니다.
 // =====================================================
+
+/**
+ * 블러 플레이스홀더 데이터 URL
+ * 이미지 로드 중 표시할 간단한 그라디언트 SVG입니다.
+ */
+const BLUR_DATA_URL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9ImEiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuNCIgbnVtT2N0YXZlcz0iNSIgc2VlZD0iMiIgcmVzdWx0PSJub2lzZSIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCBmaWxsPSIjZTFkZWU2IiBmaWx0ZXI9InVybCgjYSkiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=";
 
 /** Mock 본문 콘텐츠 (Phase 5에서 Notion 블록으로 대체) */
 const MOCK_CONTENT1 = `
@@ -114,15 +128,7 @@ export async function generateMetadata({
   try {
     const post = await getPostBySlug(slug);
     if (post) {
-      return {
-        title: `${post.title} | ${categoryName}`,
-        description: post.description ?? `${categoryName} 구간 ${post.title} 코스 상세 기록`,
-        openGraph: {
-          title: post.title,
-          description: post.description ?? "",
-          images: post.coverImage ? [{ url: post.coverImage }] : [],
-        },
-      };
+      return generateTrailMetadata(post);
     }
   } catch {
     // Notion API 에러 시 Mock 메타데이터로 대체합니다
@@ -131,10 +137,7 @@ export async function generateMetadata({
   // Mock 데이터 메타데이터 폴백 (MOCK_POSTS에서 슬러그로 검색)
   const mockFallback = MOCK_POSTS.find((p) => p.slug === slug);
   if (mockFallback) {
-    return {
-      title: `${mockFallback.title} | ${categoryName}`,
-      description: mockFallback.description,
-    };
+    return generateTrailMetadata(mockFallback);
   }
 
   return {
@@ -243,13 +246,34 @@ export default async function CourseDetailPage({
     categoryPosts = filterPostsByCategory(MOCK_POSTS, categoryName);
   }
 
-  return (
-    <article className="pb-20">
+  // JSON-LD 스키마 생성
+  const breadcrumbSchema = generateBreadcrumbListSchema(post);
+  const articleSchema = generateArticleSchema(post);
 
-      {/* =========================================================
-          커버 이미지 영역
-          풀 와이드 hero 이미지로 코스의 첫인상을 전달합니다.
-          ========================================================= */}
+  return (
+    <>
+      {/* JSON-LD 구조화 데이터 */}
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+      <Script
+        id="article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema),
+        }}
+      />
+
+      <article className="pb-20">
+
+        {/* =========================================================
+            커버 이미지 영역
+            풀 와이드 hero 이미지로 코스의 첫인상을 전달합니다.
+            ========================================================= */}
       <div className="relative w-full aspect-video max-h-[520px] overflow-hidden bg-muted">
         {post.coverImage ? (
           <Image
@@ -257,7 +281,9 @@ export default async function CourseDetailPage({
             alt={`${post.title} 대표 이미지`}
             fill
             priority
-            className="object-cover"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+            className="object-cover dark:brightness-110"
             sizes="100vw"
           />
         ) : (
@@ -313,10 +339,18 @@ export default async function CourseDetailPage({
 
           {/* 코스 요약 설명 */}
           {post.description && (
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-6">
               {post.description}
             </p>
           )}
+
+          {/* 공유 버튼 */}
+          <div className="flex items-center gap-4">
+            <ShareButton
+              url={`https://korea-dulegil-blog.vercel.app/${categorySlug}/${post.slug}`}
+              title={post.title}
+            />
+          </div>
         </header>
 
         {/* -------------------------------------------------------
@@ -626,5 +660,6 @@ export default async function CourseDetailPage({
 
       </div>
     </article>
+    </>
   );
 }

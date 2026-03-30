@@ -50,6 +50,13 @@ const categoryColorMap: Record<string, string> = {
 const FALLBACK_IMAGE = "/images/trail-placeholder.jpg";
 
 /**
+ * 블러 플레이스홀더 데이터 URL
+ * 이미지 로드 중 표시할 간단한 그라디언트 SVG입니다.
+ */
+const BLUR_DATA_URL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9ImEiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuNCIgbnVtT2N0YXZlcz0iNSIgc2VlZD0iMiIgcmVzdWx0PSJub2lzZSIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCBmaWxsPSIjZTFkZWU2IiBmaWx0ZXI9InVybCgjYSkiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=";
+
+/**
  * TrailCard
  *
  * 코스 정보를 카드 형태로 표시하는 재사용 컴포넌트입니다.
@@ -83,8 +90,10 @@ export function TrailCard({ post, priority = false }: TrailCardProps) {
             alt={`${post.title} 코스 대표 이미지`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-300 dark:brightness-110"
             priority={priority}
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
             // 이미지 로딩 실패 시 플레이스홀더로 대체
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = FALLBACK_IMAGE;

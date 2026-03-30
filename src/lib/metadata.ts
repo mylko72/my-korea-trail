@@ -16,6 +16,7 @@
 
 import type { Metadata } from "next";
 import type { TrailPost, TrailCategory } from "./types";
+import { slugToCategory } from "./utils";
 
 // =====================================================
 // 코스 상세 페이지 메타데이터
@@ -29,9 +30,11 @@ import type { TrailPost, TrailCategory } from "./types";
  * @returns Next.js Metadata 객체
  */
 export function generateTrailMetadata(post: TrailPost): Metadata {
+  const baseUrl = "https://korea-dulegil-blog.vercel.app";
   const title = `${post.title} | 코리아 둘레길`;
   const description =
     post.description ?? `${post.category} 구간 도보 여행 기록`;
+  const postUrl = `${baseUrl}/${encodeURIComponent(post.category)}/${post.slug}`;
 
   return {
     title,
@@ -40,6 +43,7 @@ export function generateTrailMetadata(post: TrailPost): Metadata {
       title,
       description,
       type: "article",
+      url: postUrl,
       // 커버 이미지가 있을 때만 og:image 태그를 포함합니다
       images: post.coverImage ? [{ url: post.coverImage }] : [],
     },
@@ -67,6 +71,86 @@ export function generateCategoryMetadata(category: TrailCategory): Metadata {
       title,
       description,
       type: "website",
+    },
+  };
+}
+
+// =====================================================
+// JSON-LD 구조화 데이터
+// =====================================================
+
+/**
+ * BreadcrumbList JSON-LD 스키마를 생성합니다.
+ * schema.org/BreadcrumbList - 검색 결과의 breadcrumb 네비게이션 표시
+ *
+ * @param post - 메타데이터를 생성할 TrailPost 객체
+ * @returns BreadcrumbList JSON-LD 객체
+ */
+export function generateBreadcrumbListSchema(post: TrailPost) {
+  const baseUrl = "https://korea-dulegil-blog.vercel.app";
+  const categoryUrl = `${baseUrl}/${encodeURIComponent(post.category)}`;
+  const postUrl = `${baseUrl}/${encodeURIComponent(post.category)}/${post.slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "홈",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: post.category,
+        item: categoryUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: postUrl,
+      },
+    ],
+  };
+}
+
+/**
+ * Article JSON-LD 스키마를 생성합니다.
+ * schema.org/Article - 기사/블로그 포스트 검색 결과 최적화
+ *
+ * @param post - 메타데이터를 생성할 TrailPost 객체
+ * @returns Article JSON-LD 객체
+ */
+export function generateArticleSchema(post: TrailPost) {
+  const baseUrl = "https://korea-dulegil-blog.vercel.app";
+  const postUrl = `${baseUrl}/${encodeURIComponent(post.category)}/${post.slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description ?? `${post.category} 구간 도보 여행 기록`,
+    image: post.coverImage ? [post.coverImage] : [],
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Organization",
+      name: "코리아 둘레길",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "코리아 둘레길",
+      logo: {
+        "@type": "ImageObject",
+        url: `${baseUrl}/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": postUrl,
     },
   };
 }

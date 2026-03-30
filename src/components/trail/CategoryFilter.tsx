@@ -61,6 +61,7 @@ export function CategoryFilter({ selected, onChange, className }: CategoryFilter
         type="button"
         onClick={() => onChange(null)}
         aria-pressed={selected === null}
+        aria-label="모든 카테고리 표시"
         className={cn(
           // 기본 스타일
           "inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-150",
@@ -83,6 +84,7 @@ export function CategoryFilter({ selected, onChange, className }: CategoryFilter
             type="button"
             onClick={() => onChange(category)}
             aria-pressed={isActive}
+            aria-label={`${category} 카테고리만 표시`}
             className={cn(
               // 기본 스타일
               "inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-150",

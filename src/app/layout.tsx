@@ -17,6 +17,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Toaster } from "@/components/ui/sonner";
+import { PageLoader } from "@/components/ui/page-loader";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import NavBar from "@/components/layout/NavBar";
 import Footer from "@/components/layout/Footer";
 
@@ -89,6 +91,9 @@ export default function RootLayout({
           테마 변경 함수(toggleTheme)를 전달합니다.
         */}
         <ThemeProvider>
+          {/* 페이지 전환 시 로딩 인디케이터 */}
+          <PageLoader />
+
           {/* 모든 페이지 상단에 고정되는 네비게이션 바 */}
           <NavBar />
 
@@ -105,6 +110,9 @@ export default function RootLayout({
             richColors를 활성화하면 success/error 등 유형별로 색상이 구분됩니다.
           */}
           <Toaster position="bottom-right" richColors />
+
+          {/* 맨 위로 스크롤 버튼 */}
+          <ScrollToTop />
         </ThemeProvider>
       </body>
     </html>
