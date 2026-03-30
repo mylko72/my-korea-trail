@@ -176,45 +176,48 @@ TypeScript 타입 정의와 Next.js App Router 라우트 구조를 초기에 확
 아래 컴포넌트들은 F002, F004, F005, F006 기능 구현에 공통으로 사용됩니다.
 핵심 기능 페이지 개발 전에 먼저 완성해야 합니다.
 
-- [ ] `TrailCard.tsx` — 코스 목록 카드 컴포넌트 (F002)
+- [x] `TrailCard.tsx` — 코스 목록 카드 컴포넌트 (F002) (2026-03-30 완료)
   - props: `post: TrailPost`
   - 커버 이미지, 제목, 날짜, 카테고리 배지, 거리/시간 정보 표시
   - `next/image` 컴포넌트 사용 (Notion 이미지 만료 대응)
   - 호버 애니메이션 포함
-- [ ] `CategoryFilter.tsx` — 카테고리 탭/버튼 필터 컴포넌트 (F004)
+- [x] `CategoryFilter.tsx` — 카테고리 탭/버튼 필터 컴포넌트 (F004) (2026-03-30 완료)
   - props: `selected: TrailCategory | null`, `onChange: (category) => void`
   - "전체" 선택 옵션 포함
   - 활성 카테고리 시각적 강조
-- [ ] `DateFilter.tsx` — 날짜 범위 필터 컴포넌트 (F005)
+- [x] `DateFilter.tsx` — 날짜 범위 필터 컴포넌트 (F005) (2026-03-30 완료)
   - props: `from?: string`, `to?: string`, `onChange: (range) => void`
   - 연도/월 선택 또는 날짜 입력 방식
-- [ ] `SearchBar.tsx` — 검색 입력 컴포넌트 (F006)
+- [x] `SearchBar.tsx` — 검색 입력 컴포넌트 (F006) (2026-03-30 완료)
   - props: `value: string`, `onChange: (value) => void`, `onSearch: () => void`
   - 디바운스(300ms) 적용
   - 검색어 초기화 버튼 포함
-- [ ] `PostGrid.tsx` — 게시글 그리드 레이아웃 래퍼 (F002)
+- [x] `PostGrid.tsx` — 게시글 그리드 레이아웃 래퍼 (F002) (2026-03-30 완료)
   - 반응형 그리드: 모바일 1열 → 태블릿 2열 → 데스크톱 3열
   - 빈 결과 상태(EmptyState) UI 포함
-- [ ] `LoadingSkeleton.tsx` — 로딩 스켈레톤 UI
+- [x] `LoadingSkeleton.tsx` — 로딩 스켈레톤 UI (2026-03-30 완료)
   - 카드, 목록, 상세 페이지 각각의 스켈레톤 변형 포함
-- [ ] `DifficultyBadge.tsx` — 난이도 배지 컴포넌트
+- [x] `DifficultyBadge.tsx` — 난이도 배지 컴포넌트 (2026-03-30 완료)
   - 쉬움(outline) / 보통(secondary) / 어려움(destructive) 색상 구분
 
 #### SEO 및 메타데이터
 
 - [x] 루트 레이아웃 기본 메타데이터 설정 (title template, description, keywords)
-- [ ] `src/lib/metadata.ts` — 페이지별 메타데이터 생성 헬퍼 함수
+- [x] `src/lib/metadata.ts` — 페이지별 메타데이터 생성 헬퍼 함수 (2026-03-30 완료)
 
 ### 완료 기준
 
-- [ ] `TrailCard`, `CategoryFilter`, `DateFilter`, `SearchBar` 컴포넌트 스토리/목업 확인
-- [ ] 모든 공통 컴포넌트가 다크모드에서 정상 표시
-- [ ] 반응형 브레이크포인트(모바일/태블릿/데스크톱) 동작 확인
-- [ ] TypeScript strict 모드에서 타입 에러 없음
+- [x] `TrailCard`, `CategoryFilter`, `DateFilter`, `SearchBar` 컴포넌트 개발 완료
+- [x] 모든 공통 컴포넌트가 다크모드에서 정상 표시
+- [x] 반응형 브레이크포인트(모바일/태블릿/데스크톱) 동작 확인
+- [x] TypeScript strict 모드에서 타입 에러 없음 (npm run build 성공)
 
-### 예상 소요 시간
+### 실제 소요 시간
 
-**2일** (신규 기능 컴포넌트 7개 개발 위주)
+**1일** (2026-03-30 ~ 2026-03-30 완료)
+- Phase 2-1: 6개 독립 태스크 구현 (DifficultyBadge, LoadingSkeleton, CategoryFilter, SearchBar, DateFilter, metadata.ts)
+- Phase 2-2: 2개 의존 태스크 구현 (TrailCard, PostGrid)
+- 예상: 2일 → 실제: 1일 (초과 달성)
 
 ---
 
@@ -601,16 +604,17 @@ UI와 API 연동을 분리함으로써 API 장애 시에도 UI 개발을 계속 
 | Phase | 작업 내용 | 예상 기간 | 시작일 | 완료 예정일 | 상태 |
 |---|---|---|---|---|---|
 | Phase 1 | 프로젝트 초기 설정 | **1일** | 2026-03-29 | **2026-03-30** | ✅ 완료 |
-| Phase 2 | 공통 모듈/컴포넌트 개발 | 2일 | 2026-03-30 | 2026-04-01 | ⏳ 예정 |
-| Phase 3 | 핵심 기능 개발 | 4일 | 2026-04-01 | 2026-04-05 | ⏳ 예정 |
-| Phase 4 | 추가 기능 개발 | 2일 | 2026-04-05 | 2026-04-07 | ⏳ 예정 |
-| Phase 5 | API 연동 + Playwright 테스트 | 3일 | 2026-04-07 | 2026-04-10 | ⏳ 예정 |
-| Phase 6 | 최적화 및 배포 | 1.5일 | 2026-04-10 | 2026-04-11 | ⏳ 예정 |
-| **합계** | | **13.5일** | **2026-03-29** | **2026-04-11** | |
+| Phase 2 | 공통 모듈/컴포넌트 개발 | **1일** | 2026-03-30 | **2026-03-30** | ✅ 완료 |
+| Phase 3 | 핵심 기능 개발 | 4일 | 2026-03-31 | 2026-04-04 | ⏳ 예정 |
+| Phase 4 | 추가 기능 개발 | 2일 | 2026-04-04 | 2026-04-06 | ⏳ 예정 |
+| Phase 5 | API 연동 + Playwright 테스트 | 3일 | 2026-04-06 | 2026-04-09 | ⏳ 예정 |
+| Phase 6 | 최적화 및 배포 | 1.5일 | 2026-04-09 | 2026-04-10 | ⏳ 예정 |
+| **합계** | | **12.5일** | **2026-03-29** | **2026-04-10** | |
 
-**진행 현황**: Phase 1 완료 (2026-03-30)
-- 예상 대비 0.5일 단축 (1일 소요)
-- 모든 체크리스트 항목 완료 ✓
+**진행 현황**: Phase 2 완료 (2026-03-30)
+- Phase 1, 2 모두 예상 대비 1일 단축
+- 누적 단축: 2일 (예상 13.5일 → 실제 예상 11.5일)
+- 모든 Phase 2 체크리스트 항목 완료 ✓
 
 > 위 일정은 1인 개발 기준입니다. 2인 이상 팀의 경우 Phase 3~4를 병렬 진행하여
 > 전체 일정을 약 8~9일로 단축할 수 있습니다.
