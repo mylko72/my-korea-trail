@@ -10,17 +10,20 @@
  * - generateStaticParams: 빌드 시 모든 카테고리 경로를 미리 생성합니다.
  * - generateMetadata: 카테고리별 SEO 메타데이터를 동적으로 설정합니다.
  * - params: Promise 타입으로 반드시 await 해야 합니다 (Next.js 15+ 규칙).
+ *
+ * 데이터 흐름:
+ * - 서버: Mock 데이터(또는 Notion API)에서 게시글 목록 조회
+ * - 클라이언트: CategoryPageClient에서 필터링 상태 관리 (F004, F005)
  */
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MapPin } from "lucide-react";
 import { getAllCategories, getPostsByCategory } from "@/lib/notion";
-import { slugToCategory, categoryToSlug, formatDistance, formatDuration, formatShortDate } from "@/lib/utils";
+import { MOCK_POSTS, filterPostsByCategory } from "@/lib/mockData";
+import { slugToCategory, categoryToSlug } from "@/lib/utils";
 import type { TrailCategory, TrailPost } from "@/lib/types";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Route } from "lucide-react";
-import Link from "next/link";
+import { CategoryPageClient } from "./CategoryPageClient";
 
 // =====================================================
 // 정적 경로 사전 생성
@@ -54,7 +57,7 @@ export async function generateMetadata({
 }
 
 // =====================================================
-// 카테고리 페이지 컴포넌트
+// 카테고리 페이지 컴포넌트 (서버 컴포넌트)
 // =====================================================
 
 export default async function CategoryPage({
@@ -78,13 +81,18 @@ export default async function CategoryPage({
     notFound();
   }
 
-  // 해당 카테고리의 게시글 목록을 Notion에서 가져옵니다
-  // Notion API 미설정 또는 에러 시 빈 배열로 폴백합니다
+  // 해당 카테고리의 게시글 목록을 Notion에서 가져옵니다.
+  // Notion API 미설정 또는 에러 시 Mock 데이터로 폴백합니다.
   let posts: TrailPost[] = [];
   try {
     posts = await getPostsByCategory(categoryName);
+    // Notion API에서 데이터가 없으면 Mock 데이터로 폴백
+    if (posts.length === 0) {
+      posts = filterPostsByCategory(MOCK_POSTS, categoryName);
+    }
   } catch {
-    // Notion API 에러 시 빈 목록으로 안전하게 렌더링합니다
+    // Notion API 에러 시 Mock 데이터 사용
+    posts = filterPostsByCategory(MOCK_POSTS, categoryName);
   }
 
   return (
@@ -92,96 +100,25 @@ export default async function CategoryPage({
       {/* 페이지 헤더 */}
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
-          <MapPin className="h-5 w-5 text-primary" />
+          <MapPin className="h-5 w-5 text-primary" aria-hidden="true" />
           <span className="text-sm text-muted-foreground font-medium uppercase tracking-widest">
             코리아 둘레길
           </span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">{categoryName} 구간</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+          {categoryName} 구간
+        </h1>
         <p className="text-muted-foreground text-lg">
           {posts.length}개의 여행 기록
         </p>
       </div>
 
-      {/* 게시글이 없을 때 */}
-      {posts.length === 0 && (
-        <div className="text-center py-20 text-muted-foreground">
-          <MapPin className="h-12 w-12 mx-auto mb-4 opacity-30" />
-          <p className="text-lg">아직 기록된 여행이 없습니다.</p>
-          <p className="text-sm mt-2">곧 새로운 기록이 추가될 예정입니다.</p>
-        </div>
-      )}
-
-      {/* 게시글 목록 그리드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((post) => (
-          <Link key={post.id} href={`/${categorySlug}/${post.slug}`}>
-            <Card className="group h-full hover:shadow-md transition-shadow duration-200 cursor-pointer">
-              {/* 대표 이미지 */}
-              {post.coverImage && (
-                <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                  {/* next/image 최적화 이미지 */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              )}
-
-              <CardHeader>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">
-                    {formatShortDate(post.date)}
-                  </span>
-                  {post.difficulty && (
-                    <Badge
-                      variant={
-                        post.difficulty === "어려움"
-                          ? "destructive"
-                          : post.difficulty === "보통"
-                          ? "secondary"
-                          : "outline"
-                      }
-                    >
-                      {post.difficulty}
-                    </Badge>
-                  )}
-                </div>
-                <CardTitle className="text-lg leading-snug group-hover:text-primary transition-colors">
-                  {post.title}
-                </CardTitle>
-                {post.description && (
-                  <CardDescription className="line-clamp-2">
-                    {post.description}
-                  </CardDescription>
-                )}
-              </CardHeader>
-
-              {/* 거리 및 소요 시간 정보 */}
-              {(post.distance ?? post.duration) && (
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {post.distance && (
-                      <span className="flex items-center gap-1">
-                        <Route className="h-3.5 w-3.5" />
-                        {formatDistance(post.distance)}
-                      </span>
-                    )}
-                    {post.duration && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {formatDuration(post.duration)}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          </Link>
-        ))}
-      </div>
+      {/* 클라이언트 컴포넌트: 필터 UI + 게시글 목록 (F002, F004, F005) */}
+      <CategoryPageClient
+        initialPosts={posts}
+        currentCategory={categoryName}
+        categorySlug={categorySlug}
+      />
     </div>
   );
 }

@@ -2,18 +2,27 @@
  * 홈 페이지 (Home Page)
  *
  * 코리아 둘레길 기록 블로그의 메인 랜딩 페이지입니다.
- * 방문자에게 프로젝트 소개와 카테고리별 구간 링크를 제공합니다.
+ * 방문자에게 프로젝트 소개, 카테고리별 구간 링크, 검색, 최신 기록을 제공합니다.
  *
  * 페이지 구성:
  * 1. Hero 섹션 — 프로젝트 소개 및 CTA
  * 2. 카테고리 섹션 — 5개 구간 카드 그리드
- * 3. 소개 섹션 — 코리아 둘레길 정보
+ * 3. 최신 기록 섹션 — SearchBar + PostGrid (F002, F006)
+ * 4. 소개 섹션 — 코리아 둘레길 정보
+ *
+ * 클라이언트 컴포넌트: 검색 상태(searchQuery) 관리를 위해 "use client" 사용
  */
 
+"use client";
+
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, MapPin, Footprints } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { SearchBar } from "@/components/trail/SearchBar";
+import { PostGrid } from "@/components/trail/PostGrid";
+import { MOCK_POSTS, searchPosts } from "@/lib/mockData";
 
 // =====================================================
 // 카테고리 구간 데이터
@@ -63,13 +72,40 @@ const categories = [
   },
 ];
 
+// 홈 페이지 기본 표시 게시글 수 (최신 6개)
+const HOME_POST_LIMIT = 6;
+
+// 날짜 내림차순 정렬 후 최신 N개 추출
+const latestPosts = [...MOCK_POSTS]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, HOME_POST_LIMIT);
+
 /**
  * HomePage 컴포넌트
  *
- * 서버 컴포넌트(Server Component)로 동작합니다.
- * 인터랙션이 없으므로 "use client" 없이 서버에서 렌더링됩니다.
+ * 검색 상태 관리를 위해 클라이언트 컴포넌트로 동작합니다.
+ * 검색어가 없으면 최신 6개 게시글, 검색어가 있으면 검색 결과를 표시합니다.
  */
 export default function HomePage() {
+  // 검색어 상태 (F006)
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // 검색어 기반 필터링 결과
+  // 검색어가 없으면 최신 6개, 있으면 전체 데이터에서 검색
+  const searchResults = searchQuery.trim()
+    ? searchPosts(MOCK_POSTS, searchQuery)
+    : latestPosts;
+
+  // 검색 실행 콜백 (SearchBar의 onSearch prop)
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
+
+  // 검색어 변경 콜백 (SearchBar의 onChange prop)
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
+
   return (
     <div className="flex flex-col">
 
@@ -167,6 +203,71 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          최신 기록 섹션 (F002, F006)
+          검색바와 PostGrid로 구성됩니다.
+          검색어가 없으면 최신 6개, 있으면 검색 결과를 표시합니다.
+          ========================================================= */}
+      <section
+        className="py-20 bg-muted/20 border-t border-border"
+        aria-labelledby="recent-posts-title"
+      >
+        <div className="container mx-auto px-4">
+          {/* 섹션 헤더 */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div>
+              <h2
+                id="recent-posts-title"
+                className="text-3xl md:text-4xl font-bold mb-2"
+              >
+                {searchQuery.trim() ? "검색 결과" : "최근 기록"}
+              </h2>
+              <p className="text-muted-foreground">
+                {searchQuery.trim()
+                  ? `"${searchQuery}" 검색 결과 ${searchResults.length}개`
+                  : `최근 완주한 코스 ${latestPosts.length}개`}
+              </p>
+            </div>
+
+            {/* 검색바 (F006) */}
+            <SearchBar
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onSearch={handleSearch}
+              placeholder="코스명, 지역, 카테고리 검색..."
+              className="w-full md:w-80"
+            />
+          </div>
+
+          {/* 게시글 그리드 (F002) */}
+          <PostGrid
+            posts={searchResults}
+            emptyMessage={
+              searchQuery.trim()
+                ? "검색 결과가 없습니다."
+                : "아직 기록된 코스가 없습니다."
+            }
+            emptyDescription={
+              searchQuery.trim()
+                ? "다른 검색어를 입력해 보세요."
+                : "곧 새로운 기록이 추가될 예정입니다."
+            }
+          />
+
+          {/* 전체 보기 버튼 (검색어 없을 때만 표시) */}
+          {!searchQuery.trim() && (
+            <div className="mt-10 text-center">
+              <Button variant="outline" asChild>
+                <Link href="/east-coast">
+                  전체 기록 보기
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

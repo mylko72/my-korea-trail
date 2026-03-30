@@ -20,6 +20,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getAllPosts, getPostBySlug } from "@/lib/notion";
+import { MOCK_POSTS, filterPostsByCategory } from "@/lib/mockData";
 import {
   slugToCategory,
   categoryToSlug,
@@ -32,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PrevNextNavigation } from "@/components/trail/PrevNextNavigation";
 import {
   ArrowLeft,
   Calendar,
@@ -44,31 +46,9 @@ import {
 } from "lucide-react";
 
 // =====================================================
-// Mock 데이터 (Phase 3: UI 개발용)
-// Phase 5에서 실제 Notion API 데이터로 대체됩니다.
+// Mock 본문 콘텐츠 (Phase 3: UI 개발용)
+// Phase 5에서 실제 Notion 블록 콘텐츠로 대체됩니다.
 // =====================================================
-
-/**
- * 테스트용 Mock TrailPost 데이터
- * 실제 Notion API 연동 전 UI 검증에 사용합니다.
- */
-const MOCK_POST: TrailPost = {
-  id: "mock-post-1",
-  title: "강릉~삼척 구간 완주기",
-  category: "동해안",
-  slug: "gangneung-samcheok",
-  date: "2024-03-15",
-  coverImage:
-    "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1200&h=630&fit=crop",
-  description:
-    "강릉 해변에서 출발해 삼척 죽서루까지 이어지는 동해안의 아름다운 해안 트레킹 코스입니다.",
-  distance: 33.5,
-  duration: 480,
-  difficulty: "보통",
-  startLocation: { lat: 37.7519, lng: 129.1044, name: "강릉 해변" },
-  endLocation: { lat: 37.4392, lng: 129.1676, name: "삼척 죽서루" },
-  published: true,
-};
 
 /** Mock 본문 콘텐츠 (Phase 5에서 Notion 블록으로 대체) */
 const MOCK_CONTENT1 = `
@@ -110,10 +90,11 @@ export async function generateStaticParams() {
       slug: post.slug,
     }));
   } catch {
-    // Notion API 미설정 시 Mock 경로만 반환합니다
-    return [
-      { category: "east-coast", slug: "gangneung-samcheok" },
-    ];
+    // Notion API 미설정 시 mockData.ts의 전체 Mock 경로를 반환합니다
+    return MOCK_POSTS.map((post) => ({
+      category: categoryToSlug(post.category),
+      slug: post.slug,
+    }));
   }
 }
 
@@ -147,11 +128,12 @@ export async function generateMetadata({
     // Notion API 에러 시 Mock 메타데이터로 대체합니다
   }
 
-  // Mock 데이터 메타데이터 폴백
-  if (slug === MOCK_POST.slug) {
+  // Mock 데이터 메타데이터 폴백 (MOCK_POSTS에서 슬러그로 검색)
+  const mockFallback = MOCK_POSTS.find((p) => p.slug === slug);
+  if (mockFallback) {
     return {
-      title: `${MOCK_POST.title} | ${categoryName}`,
-      description: MOCK_POST.description,
+      title: `${mockFallback.title} | ${categoryName}`,
+      description: mockFallback.description,
     };
   }
 
@@ -226,10 +208,14 @@ export default async function CourseDetailPage({
   }
 
   // Mock 데이터 폴백 (Notion API 연동 전 개발용)
-  if (!post && slug === MOCK_POST.slug) {
-    post = MOCK_POST;
-    content1 = MOCK_CONTENT1;
-    content2 = MOCK_CONTENT2;
+  // MOCK_POSTS 배열에서 슬러그로 검색합니다
+  if (!post) {
+    const mockFallback = MOCK_POSTS.find((p) => p.slug === slug) ?? null;
+    if (mockFallback) {
+      post = mockFallback;
+      content1 = MOCK_CONTENT1;
+      content2 = MOCK_CONTENT2;
+    }
   }
 
   // 유효하지 않은 슬러그 처리
@@ -240,6 +226,21 @@ export default async function CourseDetailPage({
   // 카테고리 불일치 검증 (잘못된 URL 진입 방지)
   if (post.category !== categoryName) {
     notFound();
+  }
+
+  // 이전/다음 네비게이션을 위한 같은 카테고리 게시글 목록 조회
+  // Notion API 실패 시 Mock 데이터로 폴백
+  let categoryPosts: TrailPost[] = [];
+  try {
+    const allPostsResult = await getAllPosts({ pageSize: 100 });
+    categoryPosts = allPostsResult.items.filter(
+      (p) => p.category === categoryName
+    );
+    if (categoryPosts.length === 0) {
+      categoryPosts = filterPostsByCategory(MOCK_POSTS, categoryName);
+    }
+  } catch {
+    categoryPosts = filterPostsByCategory(MOCK_POSTS, categoryName);
   }
 
   return (
@@ -567,6 +568,25 @@ export default async function CourseDetailPage({
               </p>
             </div>
           )}
+        </section>
+
+        <Separator className="mb-10" />
+
+        {/* -------------------------------------------------------
+            이전/다음 게시글 네비게이션 (같은 카테고리 내)
+            날짜 내림차순 기준으로 이전/다음을 결정합니다.
+            ------------------------------------------------------- */}
+        <section className="mb-10" aria-labelledby="prevnext-title">
+          <h2
+            id="prevnext-title"
+            className="text-sm font-medium text-muted-foreground mb-4"
+          >
+            같은 구간의 다른 기록
+          </h2>
+          <PrevNextNavigation
+            currentPost={post}
+            allPosts={categoryPosts}
+          />
         </section>
 
         <Separator className="mb-10" />
