@@ -4,7 +4,8 @@
  * 실제 Notion API 연동 전 UI 개발 및 테스트에 사용하는 샘플 데이터입니다.
  * Phase 5에서 실제 Notion API로 전환 시 이 파일의 import를 변경하면 됩니다.
  *
- * 포함 카테고리: 동해안, 남해안, 서해안, DMZ, 지리산 (각 최소 2개)
+ * 포함 필드: completed, content2, images, rate 포함
+ * 포함 카테고리: 해파랑길, 남파랑길, 서해랑길, DMZ 평화의 길 (각 최소 2개)
  */
 
 import type { TrailPost, TrailCategory } from "@/lib/types";
@@ -13,13 +14,13 @@ import type { TrailPost, TrailCategory } from "@/lib/types";
 // Mock 데이터: 코리아 둘레길 코스 샘플
 // =====================================================
 
-/** 개발용 샘플 게시글 배열 (총 14개) */
+/** 개발용 샘플 게시글 배열 (총 11개: 해파랑길 3 + 남파랑길 3 + 서해랑길 3 + DMZ 평화의 길 2) */
 export const MOCK_POSTS: TrailPost[] = [
-  // ---- 동해안 (3개) ----
+  // ---- 해파랑길 (3개) ----
   {
     id: "mock-east-001",
     title: "강릉~삼척 구간",
-    category: "동해안",
+    category: "해파랑길",
     slug: "gangneung-samcheok",
     date: "2025-09-14",
     coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
@@ -31,11 +32,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 37.7965, lng: 128.9222, name: "경포대" },
     endLocation: { lat: 37.4494, lng: 129.1651, name: "삼척해수욕장" },
     published: true,
+    completed: true,
+    content2:
+      "해안 절벽의 아름다움이 정말 인상적이었던 코스였습니다. 9월의 날씨도 쾌적해서 최적의 트레킹 조건에서 걸을 수 있었습니다. 다음에 다시 가고 싶은 구간입니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+    ],
+    rate: 4.5,
   },
   {
     id: "mock-east-002",
     title: "울진~영덕 구간",
-    category: "동해안",
+    category: "해파랑길",
     slug: "uljin-yeongdeok",
     date: "2025-10-03",
     coverImage: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80",
@@ -47,11 +56,17 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 36.9933, lng: 129.4025, name: "울진 죽변항" },
     endLocation: { lat: 36.4154, lng: 129.3657, name: "영덕 강구항" },
     published: true,
+    completed: false,
+    content2: "어려운 난이도라고 생각했는데 실제로는 더 힘들었어요. 날씨가 좋지 않아서 중간에 포기했지만, 언젠가 다시 도전해보고 싶습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    ],
+    rate: 4,
   },
   {
     id: "mock-east-003",
     title: "고성~속초 구간",
-    category: "동해안",
+    category: "해파랑길",
     slug: "goseong-sokcho",
     date: "2025-08-22",
     coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
@@ -63,13 +78,22 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 38.4741, lng: 128.4679, name: "고성 통일전망대" },
     endLocation: { lat: 38.2049, lng: 128.5896, name: "속초 영랑호" },
     published: true,
+    completed: true,
+    content2:
+      "설악산 전망이 정말 멋있던 구간입니다. 쉬운 난이도라고 해서 가볍게 생각했는데, 풍경이 그 어떤 도움도 필요 없을 정도로 아름다웠습니다. 만족도 100점입니다.",
+    images: [
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+    ],
+    rate: 5,
   },
 
-  // ---- 남해안 (3개) ----
+  // ---- 남파랑길 (3개) ----
   {
     id: "mock-south-001",
     title: "여수~광양 구간",
-    category: "남해안",
+    category: "남파랑길",
     slug: "yeosu-gwangyang",
     date: "2025-04-12",
     coverImage: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&q=80",
@@ -81,11 +105,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 34.7415, lng: 127.7378, name: "여수 돌산도" },
     endLocation: { lat: 34.9308, lng: 127.6979, name: "광양 망덕포구" },
     published: true,
+    completed: true,
+    content2:
+      "봄 시즌에 걸어서 정말 좋았습니다. 벚꽃이 한창이어서 길이 정말 아름다웠어요. 난이도도 쉬워서 가족들과 함께 걸었는데 모두 만족했습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+    ],
+    rate: 3.5,
   },
   {
     id: "mock-south-002",
     title: "통영~거제 구간",
-    category: "남해안",
+    category: "남파랑길",
     slug: "tongyeong-geoje",
     date: "2025-05-18",
     coverImage: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80",
@@ -97,11 +129,20 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 34.8527, lng: 128.4232, name: "통영 미륵도" },
     endLocation: { lat: 34.7951, lng: 128.6895, name: "거제 해금강" },
     published: true,
+    completed: true,
+    content2:
+      "한려수도의 절경이 정말 대단했습니다. 거제 해금강의 풍경은 사진으로는 담을 수 없을 정도로 아름다웠어요. 남파랑길의 진짜 매력을 느낄 수 있는 구간이라고 생각합니다.",
+    images: [
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+    ],
+    rate: 4.5,
   },
   {
     id: "mock-south-003",
     title: "부산~창원 구간",
-    category: "남해안",
+    category: "남파랑길",
     slug: "busan-changwon",
     date: "2025-06-07",
     coverImage: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80",
@@ -113,13 +154,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 35.0482, lng: 128.9642, name: "부산 다대포" },
     endLocation: { lat: 35.1895, lng: 128.5744, name: "창원 마산합포" },
     published: true,
+    completed: false,
+    content2: "거리가 생각보다 길어서 마지막 부분에 힘이 빠졌습니다. 다음에 더 좋은 컨디션으로 다시 도전하고 싶습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    ],
+    rate: 3,
   },
 
-  // ---- 서해안 (3개) ----
+  // ---- 서해랑길 (3개) ----
   {
     id: "mock-west-001",
     title: "태안~서산 구간",
-    category: "서해안",
+    category: "서해랑길",
     slug: "taean-seosan",
     date: "2025-03-08",
     coverImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
@@ -131,11 +178,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 36.7418, lng: 126.2971, name: "태안 십리포" },
     endLocation: { lat: 36.5827, lng: 126.4853, name: "서산 간월도" },
     published: true,
+    completed: true,
+    content2:
+      "갯벌 생태계를 직접 체험할 수 있어서 정말 좋았습니다. 간월도의 신기로운 풍경도 인상적이었고, 아이들이 많이 배울 수 있는 코스였습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+    ],
+    rate: 4,
   },
   {
     id: "mock-west-002",
     title: "군산~부안 구간",
-    category: "서해안",
+    category: "서해랑길",
     slug: "gunsan-buan",
     date: "2025-11-15",
     coverImage: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
@@ -147,11 +202,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 35.9845, lng: 126.7114, name: "군산 내항" },
     endLocation: { lat: 35.7318, lng: 126.7296, name: "부안 격포항" },
     published: true,
+    completed: true,
+    content2:
+      "서해 낙조가 정말 아름다웠던 코스입니다. 새만금 방조제를 포함한 이 지역의 역사도 함께 느낄 수 있어서 문화적으로도 풍부한 경험이었습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80",
+    ],
+    rate: 3.5,
   },
   {
     id: "mock-west-003",
     title: "해남~완도 구간",
-    category: "서해안",
+    category: "서해랑길",
     slug: "haenam-wando",
     date: "2025-02-20",
     coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
@@ -163,13 +226,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 34.5584, lng: 126.5992, name: "해남 땅끝마을" },
     endLocation: { lat: 34.3144, lng: 126.7541, name: "완도항" },
     published: true,
+    completed: false,
+    content2: "땅끝마을의 역사적 의미를 느낄 수 있는 좋은 구간이었으나, 체력 문제로 끝까지 가지 못했습니다. 언젠가 다시 도전하겠습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+    ],
+    rate: 4,
   },
 
-  // ---- DMZ (2개) ----
+  // ---- DMZ 평화의 길 (2개) ----
   {
     id: "mock-dmz-001",
     title: "고성 통일전망대 구간",
-    category: "DMZ",
+    category: "DMZ 평화의 길",
     slug: "goseong-unification-observatory",
     date: "2025-07-04",
     coverImage: "https://images.unsplash.com/photo-1519817914152-22d216bb9170?w=800&q=80",
@@ -181,11 +250,19 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 38.6128, lng: 128.3712, name: "고성 통일전망대" },
     endLocation: { lat: 38.5041, lng: 128.3248, name: "고성 화진포" },
     published: true,
+    completed: true,
+    content2:
+      "분단의 현장을 직접 눈으로 보며 평화의 의미를 깊이 있게 생각할 수 있었던 의미 있는 트레킹이었습니다. 금강산을 볼 수 있다는 것만으로도 감동입니다.",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+    ],
+    rate: 4.5,
   },
   {
     id: "mock-dmz-002",
     title: "철원 노동당사 구간",
-    category: "DMZ",
+    category: "DMZ 평화의 길",
     slug: "cheorwon-labor-party",
     date: "2025-07-19",
     coverImage: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
@@ -197,56 +274,14 @@ export const MOCK_POSTS: TrailPost[] = [
     startLocation: { lat: 38.2183, lng: 127.2421, name: "철원 노동당사" },
     endLocation: { lat: 38.1671, lng: 127.3085, name: "철원 두루미 평화타운" },
     published: true,
-  },
-
-  // ---- 지리산 (3개) ----
-  {
-    id: "mock-jirisan-001",
-    title: "노고단~반야봉 구간",
-    category: "지리산",
-    slug: "nogodan-banyabong",
-    date: "2025-05-03",
-    coverImage: "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=800&q=80",
-    description:
-      "지리산 주능선 서쪽 구간. 노고단 일출을 보고 반야봉까지 걷는 천왕봉 종주의 첫 관문입니다.",
-    distance: 18.2,
-    duration: 360,
-    difficulty: "어려움",
-    startLocation: { lat: 35.3063, lng: 127.4509, name: "노고단 대피소" },
-    endLocation: { lat: 35.3311, lng: 127.5274, name: "반야봉" },
-    published: true,
-  },
-  {
-    id: "mock-jirisan-002",
-    title: "피아골~연하천 구간",
-    category: "지리산",
-    slug: "piagol-yeonhacheon",
-    date: "2025-10-25",
-    coverImage: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80",
-    description:
-      "가을 단풍의 성지 피아골에서 연하천 대피소까지 이어지는 구간. 10월 중순~하순이 단풍 절정기입니다.",
-    distance: 14.6,
-    duration: 300,
-    difficulty: "보통",
-    startLocation: { lat: 35.2714, lng: 127.5221, name: "피아골 삼거리" },
-    endLocation: { lat: 35.3157, lng: 127.5588, name: "연하천 대피소" },
-    published: true,
-  },
-  {
-    id: "mock-jirisan-003",
-    title: "세석~천왕봉 구간",
-    category: "지리산",
-    slug: "seseok-cheonwangbong",
-    date: "2025-09-28",
-    coverImage: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-    description:
-      "지리산 최고봉 천왕봉(1,915m)에 도전하는 구간. 세석평전 철쭉군락지를 지나 정상에 오르는 코스.",
-    distance: 11.3,
-    duration: 270,
-    difficulty: "어려움",
-    startLocation: { lat: 35.3082, lng: 127.6417, name: "세석 대피소" },
-    endLocation: { lat: 35.3375, lng: 127.7308, name: "천왕봉" },
-    published: true,
+    completed: true,
+    content2:
+      "역사의 현장을 걸으며 평화의 소중함을 다시 한 번 느낄 수 있었습니다. 철원 평야의 드넓은 풍경도 인상적이었고, 두루미 평화타운의 미래 지향적 메시지도 좋았습니다.",
+    images: [
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    ],
+    rate: 5,
   },
 ];
 
@@ -263,7 +298,7 @@ export const MOCK_POSTS: TrailPost[] = [
  * @returns 해당 카테고리의 게시글 배열
  *
  * @example
- * const eastCoastPosts = filterPostsByCategory(MOCK_POSTS, "동해안");
+ * const haeParangPosts = filterPostsByCategory(MOCK_POSTS, "해파랑길");
  */
 export function filterPostsByCategory(
   posts: TrailPost[],

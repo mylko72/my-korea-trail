@@ -50,6 +50,7 @@ import {
   Mountain,
   CheckCircle2,
   XCircle,
+  Star,
 } from "lucide-react";
 
 // =====================================================
@@ -184,11 +185,10 @@ export default async function CourseDetailPage({
 
   // 유효하지 않은 카테고리 슬러그 처리
   const validCategories: TrailCategory[] = [
-    "동해안",
-    "남해안",
-    "서해안",
-    "DMZ",
-    "지리산",
+    "해파랑길",
+    "남파랑길",
+    "서해랑길",
+    "DMZ 평화의 길",
   ];
   if (!validCategories.includes(categoryName)) {
     notFound();
@@ -197,14 +197,12 @@ export default async function CourseDetailPage({
   // 게시글 데이터 조회 (Notion API 또는 Mock 데이터 폴백)
   let post: TrailPost | null = null;
   let content1 = "";
-  let content2 = "";
 
   try {
     post = await getPostBySlug(slug);
     if (post) {
       // Phase 5에서 실제 Notion 블록 콘텐츠로 대체됩니다
       content1 = MOCK_CONTENT1;
-      content2 = MOCK_CONTENT2;
     }
   } catch {
     // Notion API 미설정 시 Mock 데이터로 대체합니다
@@ -217,7 +215,6 @@ export default async function CourseDetailPage({
     if (mockFallback) {
       post = mockFallback;
       content1 = MOCK_CONTENT1;
-      content2 = MOCK_CONTENT2;
     }
   }
 
@@ -416,6 +413,20 @@ export default async function CourseDetailPage({
                 </div>
               )}
 
+              {/* 별점 */}
+              {post.rate !== undefined && (
+                <div className="flex flex-col gap-1.5">
+                  <dt className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" aria-hidden="true" />
+                    평점
+                  </dt>
+                  <dd className="flex items-center gap-2">
+                    <span className="text-lg font-bold">{post.rate.toFixed(1)}</span>
+                    <span className="text-xs text-muted-foreground">/ 5.0</span>
+                  </dd>
+                </div>
+              )}
+
             </dl>
           </CardContent>
         </Card>
@@ -525,10 +536,10 @@ export default async function CourseDetailPage({
           </section>
         )}
 
-        {content1 && content2 && <Separator className="mb-10" />}
+        {content1 && post.content2 && <Separator className="mb-10" />}
 
         {/* 코스 리뷰 (Content2) */}
-        {content2 && (
+        {post.content2 ? (
           <section
             className="mb-10"
             aria-labelledby="content2-title"
@@ -540,7 +551,7 @@ export default async function CourseDetailPage({
               코스 리뷰
             </h2>
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              {content2.split("\n\n").filter(Boolean).map((paragraph, index) => (
+              {post.content2.split("\n\n").filter(Boolean).map((paragraph, index) => (
                 <p
                   key={index}
                   className="text-foreground/80 leading-relaxed mb-4 last:mb-0"
@@ -550,11 +561,13 @@ export default async function CourseDetailPage({
               ))}
             </div>
           </section>
+        ) : (
+          <p className="text-muted-foreground">코스 리뷰가 없습니다.</p>
         )}
 
         {/* -------------------------------------------------------
             이미지 갤러리 (F003: 코스 사진)
-            Phase 5에서 Notion 이미지 목록으로 대체됩니다.
+            post.images 배열로 여러 사진을 표시합니다.
             ------------------------------------------------------- */}
         <section
           className="mb-10"
@@ -567,41 +580,45 @@ export default async function CourseDetailPage({
             코스 사진
           </h2>
 
-          {post.coverImage ? (
-            /* 커버 이미지를 갤러리 대표 이미지로 표시 */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                <Image
-                  src={post.coverImage}
-                  alt={`${post.title} 코스 사진 1`}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
+          {(() => {
+            const galleryImages = post.images?.length
+              ? post.images
+              : post.coverImage
+                ? [post.coverImage]
+                : [];
+
+            return galleryImages.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {galleryImages.map((src, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted"
+                  >
+                    <Image
+                      src={src}
+                      alt={`${post.title} 사진 ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-300 dark:brightness-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_DATA_URL}
+                    />
+                  </div>
+                ))}
               </div>
-              {/* 추가 이미지 플레이스홀더 (Phase 5에서 실제 이미지로 대체) */}
-              <div className="relative aspect-video rounded-lg overflow-hidden bg-muted border border-dashed border-border flex flex-col items-center justify-center gap-2">
+            ) : (
+              /* 이미지 없음 상태 */
+              <div className="rounded-lg border border-dashed border-border p-12 flex flex-col items-center gap-3">
                 <Mountain
-                  className="h-8 w-8 text-muted-foreground/30"
+                  className="h-10 w-10 text-muted-foreground/30"
                   aria-hidden="true"
                 />
-                <p className="text-xs text-muted-foreground/50">
-                  추가 사진 준비 중
+                <p className="text-sm text-muted-foreground">
+                  등록된 사진이 없습니다.
                 </p>
               </div>
-            </div>
-          ) : (
-            /* 이미지 없음 상태 */
-            <div className="rounded-lg border border-dashed border-border p-12 flex flex-col items-center gap-3">
-              <Mountain
-                className="h-10 w-10 text-muted-foreground/30"
-                aria-hidden="true"
-              />
-              <p className="text-sm text-muted-foreground">
-                아직 등록된 사진이 없습니다.
-              </p>
-            </div>
-          )}
+            );
+          })()}
         </section>
 
         <Separator className="mb-10" />
@@ -638,22 +655,26 @@ export default async function CourseDetailPage({
 
           {/* 완보/미완 상태 표시 */}
           <div className="flex items-center gap-2 text-sm">
-            {post.published ? (
-              <>
-                <CheckCircle2
-                  className="h-4 w-4 text-green-500"
-                  aria-hidden="true"
-                />
-                <span className="text-muted-foreground">완주 기록</span>
-              </>
+            {post.completed !== undefined ? (
+              post.completed ? (
+                <>
+                  <CheckCircle2
+                    className="h-4 w-4 text-green-500"
+                    aria-hidden="true"
+                  />
+                  <span className="text-muted-foreground">완보</span>
+                </>
+              ) : (
+                <>
+                  <XCircle
+                    className="h-4 w-4 text-orange-400"
+                    aria-hidden="true"
+                  />
+                  <span className="text-muted-foreground">미완</span>
+                </>
+              )
             ) : (
-              <>
-                <XCircle
-                  className="h-4 w-4 text-orange-400"
-                  aria-hidden="true"
-                />
-                <span className="text-muted-foreground">미완주 기록</span>
-              </>
+              <span className="text-muted-foreground">기록 없음</span>
             )}
           </div>
         </footer>

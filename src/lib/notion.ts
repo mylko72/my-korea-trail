@@ -92,7 +92,7 @@ function mapPageToTrailPost(page: any): TrailPost {
   return {
     id: page.id,
     title: extractPlainText(props.Title?.title ?? []),
-    category: (props.Category?.select?.name ?? "동해안") as TrailCategory,
+    category: (props.Category?.select?.name ?? "해파랑길") as TrailCategory,
     slug: extractPlainText(props.Slug?.rich_text ?? []) || page.id,
     date: props.Date?.date?.start ?? new Date().toISOString(),
     coverImage: extractFileUrl(props.CoverImage?.files?.[0]),
@@ -106,6 +106,12 @@ function mapPageToTrailPost(page: any): TrailPost {
     endLocation,
     published: props.Published?.checkbox ?? false,
     notionUrl: page.url,
+    completed: props.Completed?.select?.name === "완보",
+    content2: extractPlainText(props.Content2?.rich_text ?? []) || undefined,
+    images: (props.Images?.files ?? [])
+      .map((f: NotionFile) => extractFileUrl(f))
+      .filter((url: string | undefined): url is string => Boolean(url)),
+    rate: props.Rate?.number ?? undefined,
   };
 }
 
@@ -253,5 +259,5 @@ export async function getPageBlocks(pageId: string) {
 export async function getAllCategories(): Promise<TrailCategory[]> {
   // 카테고리 목록은 PRD에서 고정된 값이므로 하드코딩합니다.
   // Notion 데이터베이스의 Category select 옵션과 반드시 일치해야 합니다.
-  return ["동해안", "남해안", "서해안", "DMZ", "지리산"];
+  return ["해파랑길", "남파랑길", "서해랑길", "DMZ 평화의 길"];
 }
