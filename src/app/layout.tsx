@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     default: "코리아 둘레길 기록 블로그",
     template: "%s | 코리아 둘레길",
   },
-  description: "Notion CMS 기반 코리아 둘레길 도보 여행 기록 블로그. 동해안, 남해안, 서해안, DMZ, 지리산 구간 여행 기록을 공유합니다.",
+  description: "Notion CMS 기반 코리아 둘레길 도보 여행 기록 블로그. 해파랑길, 남파랑길, 서해랑길, DMZ 평화의 길 구간 여행 기록을 공유합니다.",
   keywords: ["코리아 둘레길", "둘레길", "도보 여행", "트레킹", "한국 여행"],
 };
 

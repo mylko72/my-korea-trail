@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "본문으로 바로가기" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "코리아 둘레길" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - generic [ref=e9]: 코리아 둘레길
+      - navigation "주요 네비게이션" [ref=e10]:
+        - link "홈" [ref=e11] [cursor=pointer]:
+          - /url: /
+        - link "해파랑길" [ref=e12] [cursor=pointer]:
+          - /url: /해파랑길
+        - link "남파랑길" [ref=e13] [cursor=pointer]:
+          - /url: /남파랑길
+        - link "서해랑길" [ref=e14] [cursor=pointer]:
+          - /url: /서해랑길
+        - link "DMZ 평화의 길" [ref=e15] [cursor=pointer]:
+          - /url: /DMZ%20평화의%20길
+      - button "다크 모드로 전환" [ref=e17]:
+        - img
+  - main [ref=e18]:
+    - article "코스 상세 페이지 로딩 중" [ref=e19]
+  - contentinfo [ref=e90]:
+    - generic [ref=e91]:
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - img [ref=e94]
+          - generic [ref=e97]: 코리아 둘레길
+        - navigation "카테고리 링크" [ref=e98]:
+          - link "해파랑길" [ref=e99] [cursor=pointer]:
+            - /url: /해파랑길
+          - link "남파랑길" [ref=e100] [cursor=pointer]:
+            - /url: /남파랑길
+          - link "서해랑길" [ref=e101] [cursor=pointer]:
+            - /url: /서해랑길
+          - link "DMZ 평화의 길" [ref=e102] [cursor=pointer]:
+            - /url: /DMZ%20평화의%20길
+        - link "GitHub 저장소로 이동" [ref=e103] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e104]
+          - generic [ref=e107]: GitHub
+      - paragraph [ref=e109]: © 2026 코리아 둘레길. All rights reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e115] [cursor=pointer]:
+    - img [ref=e116]
+```

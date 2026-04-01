@@ -20,7 +20,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
-import { getAllPosts, getPostBySlug } from "@/lib/notion";
+import { getCachedAllPosts, getCachedPostBySlug } from "@/lib/notion";
 import { MOCK_POSTS, filterPostsByCategory } from "@/lib/mockData";
 import {
   slugToCategory,
@@ -98,7 +98,7 @@ const MOCK_CONTENT2 = `
 
 export async function generateStaticParams() {
   try {
-    const result = await getAllPosts({ pageSize: 100 });
+    const result = await getCachedAllPosts({ pageSize: 100 });
     // 모든 게시글의 category + slug 조합으로 정적 경로를 생성합니다
     return result.items.map((post) => ({
       category: categoryToSlug(post.category),
@@ -127,7 +127,7 @@ export async function generateMetadata({
   const categoryName = slugToCategory(categorySlug);
 
   try {
-    const post = await getPostBySlug(slug);
+    const post = await getCachedPostBySlug(slug);
     if (post) {
       return generateTrailMetadata(post);
     }
@@ -199,7 +199,7 @@ export default async function CourseDetailPage({
   let content1 = "";
 
   try {
-    post = await getPostBySlug(slug);
+    post = await getCachedPostBySlug(slug);
     if (post) {
       // Phase 5에서 실제 Notion 블록 콘텐츠로 대체됩니다
       content1 = MOCK_CONTENT1;
@@ -232,7 +232,7 @@ export default async function CourseDetailPage({
   // Notion API 실패 시 Mock 데이터로 폴백
   let categoryPosts: TrailPost[] = [];
   try {
-    const allPostsResult = await getAllPosts({ pageSize: 100 });
+    const allPostsResult = await getCachedAllPosts({ pageSize: 100 });
     categoryPosts = allPostsResult.items.filter(
       (p) => p.category === categoryName
     );

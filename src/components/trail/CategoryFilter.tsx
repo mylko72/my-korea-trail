@@ -5,7 +5,7 @@
  * "전체" 선택을 포함하며, 선택된 카테고리를 시각적으로 강조합니다.
  *
  * 사용 예시:
- * <CategoryFilter selected="동해안" onChange={(cat) => setCategory(cat)} />
+ * <CategoryFilter selected="해파랑길" onChange={(cat) => setCategory(cat)} />
  */
 
 "use client";
@@ -31,22 +31,21 @@ interface CategoryFilterProps {
 // 카테고리 목록 (순서 고정)
 // =====================================================
 
-const CATEGORIES: TrailCategory[] = ["동해안", "남해안", "서해안", "DMZ", "지리산"];
+const CATEGORIES: TrailCategory[] = ["해파랑길", "남파랑길", "서해랑길", "DMZ 평화의 길"];
 
 // 카테고리별 색상 강조 클래스 (활성 상태일 때 적용)
 const categoryActiveColorMap: Record<TrailCategory, string> = {
-  동해안: "bg-blue-500 hover:bg-blue-600 text-white border-blue-500",
-  남해안: "bg-teal-500 hover:bg-teal-600 text-white border-teal-500",
-  서해안: "bg-orange-500 hover:bg-orange-600 text-white border-orange-500",
-  DMZ: "bg-slate-600 hover:bg-slate-700 text-white border-slate-600",
-  지리산: "bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-500",
+  해파랑길: "bg-blue-500 hover:bg-blue-600 text-white border-blue-500",
+  남파랑길: "bg-teal-500 hover:bg-teal-600 text-white border-teal-500",
+  서해랑길: "bg-orange-500 hover:bg-orange-600 text-white border-orange-500",
+  "DMZ 평화의 길": "bg-slate-600 hover:bg-slate-700 text-white border-slate-600",
 };
 
 /**
  * CategoryFilter
  *
  * 카테고리 선택 필터 컴포넌트입니다.
- * "전체" + 5개 카테고리 버튼으로 구성됩니다.
+ * "전체" + 4개 카테고리 버튼으로 구성됩니다.
  * 클라이언트 컴포넌트이며 상위에서 상태를 관리합니다.
  */
 export function CategoryFilter({ selected, onChange, className }: CategoryFilterProps) {

@@ -57,7 +57,7 @@ export function generateTrailMetadata(post: TrailPost): Metadata {
 /**
  * 카테고리 페이지의 SEO 메타데이터를 생성합니다.
  *
- * @param category - 카테고리 이름 (예: "동해안", "남해안")
+ * @param category - 카테고리 이름 (예: "해파랑길", "남파랑길")
  * @returns Next.js Metadata 객체
  */
 export function generateCategoryMetadata(category: TrailCategory): Metadata {

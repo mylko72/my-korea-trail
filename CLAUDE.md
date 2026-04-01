@@ -63,7 +63,7 @@ src/
 - `/[category]` - 카테고리별 코스 목록 (예: `/동해안`)
 - `/[category]/[slug]` - 코스 상세 (예: `/동해안/course-1`) *(미개발)*
 
-**카테고리**: "동해안", "남해안", "서해안", "DMZ", "지리산" (type: `TrailCategory`)
+**카테고리**: "해파랑길", "남파랑길", "서해랑길", "DMZ 평화의 길" (type: `TrailCategory`)
 
 ## Notion API 연동
 

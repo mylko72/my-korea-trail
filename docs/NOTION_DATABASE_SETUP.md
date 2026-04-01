@@ -525,6 +525,93 @@ Database 설정이 완료되면:
 
 ---
 
+## 🖼️ 이미지 관리 정책
+
+### Notion 이미지 URL 1시간 만료 문제
+
+Notion 데이터베이스에 업로드한 이미지(CoverImage, Images)는 보안상 1시간 후 URL이 만료됩니다.
+이로 인해 배포 후 이미지가 깨지는 문제가 발생할 수 있습니다.
+
+### ✅ 권장 해결 방안 (우선순위)
+
+#### **방안 1: 외부 이미지 호스팅 서비스 사용 (권장)** ⭐⭐⭐
+
+Notion에 업로드하는 대신 **외부 이미지 호스팅 서비스**의 URL을 "링크로 추가"하세요.
+
+**지원 서비스**:
+- **Unsplash** (https://unsplash.com) - 무료 고해상도 사진
+- **Pexels** (https://pexels.com) - 무료 저작권 없는 이미지
+- **Cloudinary** (https://cloudinary.com) - 이미지 최적화 + CDN
+- **Imgur** (https://imgur.com) - 간단한 이미지 호스팅
+- **AWS S3** - 프로덕션 환경 권장
+
+**설정 방법**:
+1. Notion Database에서 CoverImage 또는 Images 필드 클릭
+2. "+"  버튼 클릭 → "링크로 추가" 선택
+3. 외부 이미지 URL 입력 (예: `https://images.unsplash.com/photo-...`)
+
+**장점**:
+- ✅ URL 만료 없음 (장기 안정성)
+- ✅ CDN을 통한 빠른 로딩
+- ✅ 이미지 최적화 지원 (Cloudinary)
+- ✅ 관리 용이
+
+---
+
+#### **방안 2: Notion 웹 클립 (Web Clip)** ⭐⭐
+
+Notion의 "웹 클립" 기능을 사용하여 외부 URL을 추가합니다.
+
+**설정 방법**:
+1. Notion Database에서 CoverImage 필드 클릭
+2. "+"  버튼 클릭 → "웹 클립" 선택
+3. 웹 페이지 URL 입력 → Notion이 자동으로 썸네일 추출
+
+**장점**:
+- ✅ URL 만료 없음
+- ✅ 자동 썸네일 생성
+
+---
+
+#### **방안 3: 이미지 프록시 Route Handler (미래)** 
+
+현재 구현 중: `/api/image?url=...` Route Handler로 Notion 이미지를 프록시합니다.
+
+**기술 사항**:
+- 요청할 때마다 Notion API에서 새 URL 획득
+- 프로덕션에서 이미지 깨짐 방지
+- 추가 API 호출로 인한 성능 영향 존재
+
+**실제 사용 (Phase 5.5 이후)**:
+```typescript
+// 현재 방식
+<Image src={post.coverImage} />
+
+// 프록시 방식 (미래)
+<Image src={`/api/image?url=${encodeURIComponent(post.coverImage)}`} />
+```
+
+---
+
+### 📋 이미지 업로드 체크리스트
+
+새로운 코스를 Notion에 추가할 때:
+
+- [ ] **CoverImage**
+  - [ ] ✅ 외부 URL 사용 (Unsplash, Cloudinary 등)
+  - [ ] ☐ Notion 내부 파일 업로드 (❌ 비권장: 1시간 후 만료)
+  - [ ] ☐ 웹 클립으로 추가
+
+- [ ] **Images**
+  - [ ] ✅ 외부 URL 또는 웹 클립 사용 (권장)
+  - [ ] ☐ Notion 내부 파일 (최대 5장, 단기만 사용)
+
+- [ ] **이미지 명명**
+  - [ ] 의미 있는 파일명 사용 (예: `kangneung-coastal-view.jpg`)
+  - [ ] 한글 이름 피하기 (URL 인코딩 문제 방지)
+
+---
+
 ## ❓ FAQ
 
 ### Q: Notion 이미지가 1시간 후 깨지는데 어떻게 해야 하나요?

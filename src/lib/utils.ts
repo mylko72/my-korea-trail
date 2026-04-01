@@ -84,16 +84,15 @@ export function formatDuration(minutes: number): string {
  * 카테고리 이름을 URL 슬러그로 변환합니다.
  * 한국어 카테고리명을 URL에서 사용 가능한 영문 슬러그로 매핑합니다.
  *
- * @param category - 카테고리 이름 (예: "동해안")
- * @returns URL 슬러그 (예: "east-coast")
+ * @param category - 카테고리 이름 (예: "해파랑길")
+ * @returns URL 슬러그 (예: "hae-parang-gil")
  */
 export function categoryToSlug(category: string): string {
   const slugMap: Record<string, string> = {
-    동해안: "east-coast",
-    남해안: "south-coast",
-    서해안: "west-coast",
-    DMZ: "dmz",
-    지리산: "jirisan",
+    해파랑길: "hae-parang-gil",
+    남파랑길: "nam-parang-gil",
+    서해랑길: "seo-hae-rang-gil",
+    "DMZ 평화의 길": "dmz-peace-trail",
   };
   return slugMap[category] ?? encodeURIComponent(category);
 }
@@ -102,16 +101,15 @@ export function categoryToSlug(category: string): string {
  * URL 슬러그를 카테고리 이름으로 변환합니다.
  * categoryToSlug의 역변환 함수입니다.
  *
- * @param slug - URL 슬러그 (예: "east-coast")
- * @returns 카테고리 이름 (예: "동해안")
+ * @param slug - URL 슬러그 (예: "hae-parang-gil")
+ * @returns 카테고리 이름 (예: "해파랑길")
  */
 export function slugToCategory(slug: string): string {
   const categoryMap: Record<string, string> = {
-    "east-coast": "동해안",
-    "south-coast": "남해안",
-    "west-coast": "서해안",
-    dmz: "DMZ",
-    jirisan: "지리산",
+    "hae-parang-gil": "해파랑길",
+    "nam-parang-gil": "남파랑길",
+    "seo-hae-rang-gil": "서해랑길",
+    "dmz-peace-trail": "DMZ 평화의 길",
   };
   return categoryMap[slug] ?? decodeURIComponent(slug);
 }

@@ -19,7 +19,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
-import { getAllCategories, getPostsByCategory } from "@/lib/notion";
+import { getAllCategories, getCachedPostsByCategory } from "@/lib/notion";
 import { MOCK_POSTS, filterPostsByCategory } from "@/lib/mockData";
 import { slugToCategory, categoryToSlug } from "@/lib/utils";
 import type { TrailCategory, TrailPost } from "@/lib/types";
@@ -71,11 +71,10 @@ export default async function CategoryPage({
 
   // 유효하지 않은 카테고리 슬러그 처리
   const validCategories: TrailCategory[] = [
-    "동해안",
-    "남해안",
-    "서해안",
-    "DMZ",
-    "지리산",
+    "해파랑길",
+    "남파랑길",
+    "서해랑길",
+    "DMZ 평화의 길",
   ];
   if (!validCategories.includes(categoryName)) {
     notFound();
@@ -85,7 +84,7 @@ export default async function CategoryPage({
   // Notion API 미설정 또는 에러 시 Mock 데이터로 폴백합니다.
   let posts: TrailPost[] = [];
   try {
-    posts = await getPostsByCategory(categoryName);
+    posts = await getCachedPostsByCategory(categoryName);
     // Notion API에서 데이터가 없으면 Mock 데이터로 폴백
     if (posts.length === 0) {
       posts = filterPostsByCategory(MOCK_POSTS, categoryName);

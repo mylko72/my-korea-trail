@@ -13,6 +13,7 @@
  */
 
 import { Client } from "@notionhq/client";
+import { unstable_cache } from "next/cache";
 import type {
   TrailPost,
   TrailCategory,
@@ -119,6 +120,8 @@ function mapPageToTrailPost(page: any): TrailPost {
  * Notion search() 결과에서 특정 데이터베이스의 페이지만 필터링합니다.
  * v5에서 databases.query()가 제거되어 search()로 대체합니다.
  *
+ * Notion API는 parent.type이 "database_id" 또는 "data_source_id"일 수 있으므로 둘 다 체크합니다.
+ *
  * @param results - search() 결과 배열
  * @returns 해당 데이터베이스 소속 페이지만 포함된 배열
  */
@@ -126,11 +129,19 @@ function mapPageToTrailPost(page: any): TrailPost {
 function filterByDatabase(results: any[]): any[] {
   return results.filter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (page: any) =>
-      page.object === "page" &&
-      page.parent?.type === "database_id" &&
-      page.parent.database_id?.replace(/-/g, "") ===
-        DATABASE_ID.replace(/-/g, "")
+    (page: any) => {
+      if (page.object !== "page") return false;
+
+      const normalizedDbId = DATABASE_ID.replace(/-/g, "");
+      const pageDbId = page.parent?.database_id?.replace(/-/g, "");
+
+      // parent.type이 "database_id" 또는 "data_source_id"일 수 있음
+      const isValidParentType =
+        page.parent?.type === "database_id" ||
+        page.parent?.type === "data_source_id";
+
+      return isValidParentType && pageDbId === normalizedDbId;
+    }
   );
 }
 
@@ -150,41 +161,51 @@ export async function getAllPosts(options?: {
   cursor?: string;
   pageSize?: number;
 }): Promise<PaginatedResult<TrailPost>> {
-  const { category, cursor, pageSize = 10 } = options ?? {};
+  try {
+    const { category, cursor, pageSize = 10 } = options ?? {};
 
-  // v5: notion.search()로 해당 데이터베이스의 페이지를 조회합니다.
-  // filter.value: "page" — 페이지 타입만 반환
-  const response = await notion.search({
-    filter: { value: "page", property: "object" },
-    start_cursor: cursor,
-    page_size: pageSize,
-  });
+    // v5: notion.search()로 해당 데이터베이스의 페이지를 조회합니다.
+    // filter.value: "page" — 페이지 타입만 반환
+    const response = await notion.search({
+      filter: { value: "page", property: "object" },
+      start_cursor: cursor,
+      page_size: pageSize,
+    });
 
-  // 해당 데이터베이스 소속 페이지만 추출합니다
-  let pages = filterByDatabase(response.results);
+    // 해당 데이터베이스 소속 페이지만 추출합니다
+    let pages = filterByDatabase(response.results);
 
-  // Published 속성 필터링 (클라이언트 사이드)
-  pages = pages.filter((page) => page.properties?.Published?.checkbox === true);
+    // Published 속성 필터링 (클라이언트 사이드)
+    pages = pages.filter((page) => page.properties?.Published?.checkbox === true);
 
-  // 카테고리 필터링 (선택적)
-  if (category) {
-    pages = pages.filter(
-      (page) => page.properties?.Category?.select?.name === category
-    );
+    // 카테고리 필터링 (선택적)
+    if (category) {
+      pages = pages.filter(
+        (page) => page.properties?.Category?.select?.name === category
+      );
+    }
+
+    // 날짜 내림차순 정렬
+    pages.sort((a, b) => {
+      const dateA = a.properties?.Date?.date?.start ?? "";
+      const dateB = b.properties?.Date?.date?.start ?? "";
+      return dateB.localeCompare(dateA);
+    });
+
+    return {
+      items: pages.map(mapPageToTrailPost),
+      nextCursor: response.next_cursor ?? undefined,
+      hasMore: response.has_more,
+    };
+  } catch (error) {
+    console.error("[Notion API] getAllPosts 에러:", error);
+    // 에러 발생 시 빈 배열 반환 (폴백)
+    return {
+      items: [],
+      nextCursor: undefined,
+      hasMore: false,
+    };
   }
-
-  // 날짜 내림차순 정렬
-  pages.sort((a, b) => {
-    const dateA = a.properties?.Date?.date?.start ?? "";
-    const dateB = b.properties?.Date?.date?.start ?? "";
-    return dateB.localeCompare(dateA);
-  });
-
-  return {
-    items: pages.map(mapPageToTrailPost),
-    nextCursor: response.next_cursor ?? undefined,
-    hasMore: response.has_more,
-  };
 }
 
 /**
@@ -209,26 +230,32 @@ export async function getPostsByCategory(
 export async function getPostBySlug(
   slug: string
 ): Promise<TrailPost | null> {
-  // 슬러그로 검색합니다
-  const response = await notion.search({
-    query: slug,
-    filter: { value: "page", property: "object" },
-    page_size: 10,
-  });
+  try {
+    // 슬러그로 검색합니다
+    const response = await notion.search({
+      query: slug,
+      filter: { value: "page", property: "object" },
+      page_size: 10,
+    });
 
-  const pages = filterByDatabase(response.results);
+    const pages = filterByDatabase(response.results);
 
-  // 정확한 슬러그 일치 항목을 찾습니다
-  const matched = pages.find((page) => {
-    const pageSlug =
-      extractPlainText(page.properties?.Slug?.rich_text ?? []) || page.id;
-    return (
-      pageSlug === slug && page.properties?.Published?.checkbox === true
-    );
-  });
+    // 정확한 슬러그 일치 항목을 찾습니다
+    const matched = pages.find((page) => {
+      const pageSlug =
+        extractPlainText(page.properties?.Slug?.rich_text ?? []) || page.id;
+      return (
+        pageSlug === slug && page.properties?.Published?.checkbox === true
+      );
+    });
 
-  if (!matched) return null;
-  return mapPageToTrailPost(matched);
+    if (!matched) return null;
+    return mapPageToTrailPost(matched);
+  } catch (error) {
+    console.error(`[Notion API] getPostBySlug("${slug}") 에러:`, error);
+    // 에러 발생 시 null 반환 (404 페이지로 유도)
+    return null;
+  }
 }
 
 /**
@@ -239,11 +266,17 @@ export async function getPostBySlug(
  * @returns 블록 배열
  */
 export async function getPageBlocks(pageId: string) {
-  const response = await notion.blocks.children.list({
-    block_id: pageId,
-    page_size: 100,
-  });
-  return response.results;
+  try {
+    const response = await notion.blocks.children.list({
+      block_id: pageId,
+      page_size: 100,
+    });
+    return response.results;
+  } catch (error) {
+    console.error(`[Notion API] getPageBlocks("${pageId}") 에러:`, error);
+    // 에러 발생 시 빈 배열 반환 (본문 없음)
+    return [];
+  }
 }
 
 /**
@@ -261,3 +294,97 @@ export async function getAllCategories(): Promise<TrailCategory[]> {
   // Notion 데이터베이스의 Category select 옵션과 반드시 일치해야 합니다.
   return ["해파랑길", "남파랑길", "서해랑길", "DMZ 평화의 길"];
 }
+
+// =====================================================
+// 캐싱 래핑 함수 (unstable_cache)
+//
+// Notion API 초당 3회 요청 한도를 대응하기 위해
+// Next.js unstable_cache로 결과를 캐싱합니다.
+// - revalidate: 캐시 재검증 주기 (초 단위)
+// - tags: 온디맨드 캐시 무효화를 위한 태그
+//
+// 기존 원본 함수(getAllPosts, getPostsByCategory 등)는
+// 레거시 호환성을 위해 그대로 유지됩니다.
+// =====================================================
+
+/**
+ * getAllPosts()의 캐싱 버전
+ * 60초 간격으로 재검증하여 최신 게시글을 반영합니다.
+ *
+ * 캐시 키에 category, cursor, pageSize를 포함하여
+ * 서로 다른 옵션 조합이 독립적으로 캐싱됩니다.
+ */
+export async function getCachedAllPosts(
+  options?: { category?: TrailCategory; cursor?: string; pageSize?: number }
+): Promise<PaginatedResult<TrailPost>> {
+  const { category, cursor, pageSize } = options ?? {};
+  // unstable_cache의 keyParts에 파라미터를 포함하여 옵션별 캐시 분리
+  const keyParts = [
+    "all-posts",
+    category ?? "all",
+    cursor ?? "start",
+    String(pageSize ?? 10),
+  ];
+  const cached = unstable_cache(
+    async () => getAllPosts(options),
+    keyParts,
+    { revalidate: 60, tags: ["all-posts", `posts-${category ?? "all"}`] }
+  );
+  return cached();
+}
+
+/**
+ * getPostsByCategory()의 캐싱 버전
+ * 60초 간격으로 재검증합니다.
+ * 카테고리별로 독립적인 캐시 키를 사용합니다.
+ */
+export async function getCachedPostsByCategory(
+  category: TrailCategory
+): Promise<TrailPost[]> {
+  const cached = unstable_cache(
+    async () => getPostsByCategory(category),
+    ["category-posts", category],
+    { revalidate: 60, tags: ["category-posts", `posts-${category}`] }
+  );
+  return cached();
+}
+
+/**
+ * getPostBySlug()의 캐싱 버전
+ * 상세 페이지는 변경 빈도가 낮으므로 300초(5분) 간격으로 재검증합니다.
+ * 슬러그별로 독립적인 캐시 키를 사용합니다.
+ */
+export async function getCachedPostBySlug(
+  slug: string
+): Promise<TrailPost | null> {
+  const cached = unstable_cache(
+    async () => getPostBySlug(slug),
+    ["post-slug", slug],
+    { revalidate: 300, tags: ["post-slug", `post-${slug}`] }
+  );
+  return cached();
+}
+
+/**
+ * getPageBlocks()의 캐싱 버전
+ * 페이지 본문 블록은 변경 빈도가 매우 낮으므로 3600초(1시간) 간격으로 재검증합니다.
+ * 페이지 ID별로 독립적인 캐시 키를 사용합니다.
+ */
+export async function getCachedPageBlocks(pageId: string) {
+  const cached = unstable_cache(
+    async () => getPageBlocks(pageId),
+    ["page-blocks", pageId],
+    { revalidate: 3600, tags: ["page-blocks", `blocks-${pageId}`] }
+  );
+  return cached();
+}
+
+/**
+ * getAllCategories()의 캐싱 버전
+ * 카테고리 목록은 거의 변경되지 않으므로 3600초(1시간) 간격으로 재검증합니다.
+ */
+export const getCachedAllCategories = unstable_cache(
+  async () => getAllCategories(),
+  ["all-categories"],
+  { revalidate: 3600, tags: ["all-categories"] }
+);

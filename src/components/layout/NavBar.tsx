@@ -26,15 +26,14 @@ import { Button } from "@/components/ui/button";
 /**
  * 네비게이션 링크 목록
  * 새 카테고리 페이지를 추가할 때 이 배열에 항목을 추가하세요.
- * href는 Next.js 라우터 경로와 일치해야 합니다.
+ * href는 Next.js 라우터 경로와 일치해야 합니다 (/[category] 동적 라우트).
  */
 const navLinks = [
   { href: "/", label: "홈" },
-  { href: "/east-coast", label: "동해안" },
-  { href: "/south-coast", label: "남해안" },
-  { href: "/west-coast", label: "서해안" },
-  { href: "/dmz", label: "DMZ" },
-  { href: "/jirisan", label: "지리산" },
+  { href: "/해파랑길", label: "해파랑길" },
+  { href: "/남파랑길", label: "남파랑길" },
+  { href: "/서해랑길", label: "서해랑길" },
+  { href: "/DMZ%20평화의%20길", label: "DMZ 평화의 길" },
 ];
 
 /**

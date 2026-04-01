@@ -13,11 +13,10 @@ import { Github, Footprints } from "lucide-react";
  * 새 카테고리를 추가할 때 이 배열에 항목을 추가하세요.
  */
 const categoryLinks = [
-  { label: "동해안", href: "/east-coast" },
-  { label: "남해안", href: "/south-coast" },
-  { label: "서해안", href: "/west-coast" },
-  { label: "DMZ", href: "/dmz" },
-  { label: "지리산", href: "/jirisan" },
+  { label: "해파랑길", href: "/해파랑길" },
+  { label: "남파랑길", href: "/남파랑길" },
+  { label: "서해랑길", href: "/서해랑길" },
+  { label: "DMZ 평화의 길", href: "/DMZ%20평화의%20길" },
 ];
 
 // 프로젝트 GitHub 저장소 URL (상수로 분리해 관리합니다)

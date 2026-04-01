@@ -1,0 +1,150 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "본문으로 바로가기" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "코리아 둘레길" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - generic [ref=e9]: 코리아 둘레길
+      - navigation "주요 네비게이션" [ref=e10]:
+        - link "홈" [ref=e11] [cursor=pointer]:
+          - /url: /
+        - link "해파랑길" [ref=e12] [cursor=pointer]:
+          - /url: /해파랑길
+        - link "남파랑길" [ref=e13] [cursor=pointer]:
+          - /url: /남파랑길
+        - link "서해랑길" [ref=e14] [cursor=pointer]:
+          - /url: /서해랑길
+        - link "DMZ 평화의 길" [ref=e15] [cursor=pointer]:
+          - /url: /DMZ%20평화의%20길
+      - button "다크 모드로 전환" [ref=e17]:
+        - img
+  - main [ref=e18]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e25]: 코리아 둘레길
+        - heading "해파랑길 구간" [level=1] [ref=e26]
+        - paragraph [ref=e27]: 3개의 여행 기록
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - heading "카테고리" [level=2] [ref=e31]
+            - group "카테고리 필터" [ref=e32]:
+              - button "모든 카테고리 표시" [ref=e33]: 전체
+              - button "해파랑길 카테고리만 표시" [pressed] [ref=e34]: 해파랑길
+              - button "남파랑길 카테고리만 표시" [ref=e35]: 남파랑길
+              - button "서해랑길 카테고리만 표시" [ref=e36]: 서해랑길
+              - button "DMZ 평화의 길 카테고리만 표시" [ref=e37]: DMZ 평화의 길
+          - group "날짜 범위" [ref=e40]:
+            - generic [ref=e41]:
+              - img [ref=e42]
+              - text: 날짜 범위
+            - generic [ref=e44]:
+              - generic [ref=e45]:
+                - generic [ref=e46]: 시작 날짜
+                - textbox "필터 시작 날짜" [ref=e47]
+              - generic [ref=e48]: ~
+              - generic [ref=e49]:
+                - generic [ref=e50]: 종료 날짜
+                - textbox "필터 종료 날짜" [ref=e51]
+        - paragraph [ref=e53]:
+          - generic [ref=e54]: 3개
+          - text: 의 코스 기록
+        - generic "코스 목록 3개" [ref=e55]:
+          - article [ref=e56]:
+            - link "강릉~삼척 구간 코스 상세 보기" [ref=e57] [cursor=pointer]:
+              - /url: /hae-parang-gil/gangneung-samcheok
+              - generic [ref=e58]:
+                - img "강릉~삼척 구간 코스 대표 이미지" [ref=e59]
+                - generic [ref=e61]: 해파랑길
+              - generic [ref=e62]:
+                - time [ref=e63]:
+                  - img [ref=e64]
+                  - text: 2025년 9월 14일
+                - heading "강릉~삼척 구간" [level=3] [ref=e66]
+                - paragraph [ref=e67]: 강릉 경포대에서 삼척 해수욕장까지 이어지는 해안 절경 구간입니다. 기암절벽과 맑은 바다가 어우러진 최고의 트레킹 코스.
+                - generic [ref=e68]:
+                  - generic [ref=e69]:
+                    - img [ref=e70]
+                    - text: 33.5km
+                  - generic [ref=e74]:
+                    - img [ref=e75]
+                    - text: 8시간
+                  - generic [ref=e78]:
+                    - img [ref=e79]
+                    - 'generic "난이도: 보통" [ref=e81]': 보통
+          - article [ref=e82]:
+            - link "울진~영덕 구간 코스 상세 보기" [ref=e83] [cursor=pointer]:
+              - /url: /hae-parang-gil/uljin-yeongdeok
+              - generic [ref=e84]:
+                - img "울진~영덕 구간 코스 대표 이미지" [ref=e85]
+                - generic [ref=e87]: 해파랑길
+              - generic [ref=e88]:
+                - time [ref=e89]:
+                  - img [ref=e90]
+                  - text: 2025년 10월 3일
+                - heading "울진~영덕 구간" [level=3] [ref=e92]
+                - paragraph [ref=e93]: 백두대간 동쪽 끝자락의 울진 왕피천 계곡에서 영덕 블루로드까지 잇는 구간. 청정 해안과 솔숲이 인상적입니다.
+                - generic [ref=e94]:
+                  - generic [ref=e95]:
+                    - img [ref=e96]
+                    - text: 41.2km
+                  - generic [ref=e100]:
+                    - img [ref=e101]
+                    - text: 9시간 30분
+                  - generic [ref=e104]:
+                    - img [ref=e105]
+                    - 'generic "난이도: 어려움" [ref=e107]': 어려움
+          - article [ref=e108]:
+            - link "고성~속초 구간 코스 상세 보기" [ref=e109] [cursor=pointer]:
+              - /url: /hae-parang-gil/goseong-sokcho
+              - generic [ref=e110]:
+                - img "고성~속초 구간 코스 대표 이미지" [ref=e111]
+                - generic [ref=e113]: 해파랑길
+              - generic [ref=e114]:
+                - time [ref=e115]:
+                  - img [ref=e116]
+                  - text: 2025년 8월 22일
+                - heading "고성~속초 구간" [level=3] [ref=e118]
+                - paragraph [ref=e119]: 설악산 울산바위를 배경으로 고성 통일전망대에서 속초 영랑호까지 걷는 구간입니다. 산과 바다를 동시에 즐길 수 있습니다.
+                - generic [ref=e120]:
+                  - generic [ref=e121]:
+                    - img [ref=e122]
+                    - text: 28.7km
+                  - generic [ref=e126]:
+                    - img [ref=e127]
+                    - text: 6시간 30분
+                  - generic [ref=e130]:
+                    - img [ref=e131]
+                    - 'generic "난이도: 쉬움" [ref=e133]': 쉬움
+  - contentinfo [ref=e134]:
+    - generic [ref=e135]:
+      - generic [ref=e136]:
+        - generic [ref=e137]:
+          - img [ref=e138]
+          - generic [ref=e141]: 코리아 둘레길
+        - navigation "카테고리 링크" [ref=e142]:
+          - link "해파랑길" [ref=e143] [cursor=pointer]:
+            - /url: /해파랑길
+          - link "남파랑길" [ref=e144] [cursor=pointer]:
+            - /url: /남파랑길
+          - link "서해랑길" [ref=e145] [cursor=pointer]:
+            - /url: /서해랑길
+          - link "DMZ 평화의 길" [ref=e146] [cursor=pointer]:
+            - /url: /DMZ%20평화의%20길
+        - link "GitHub 저장소로 이동" [ref=e147] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e148]
+          - generic [ref=e151]: GitHub
+      - paragraph [ref=e153]: © 2026 코리아 둘레길. All rights reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e159] [cursor=pointer]:
+    - img [ref=e160]
+  - alert [ref=e163]
+```

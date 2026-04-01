@@ -5,7 +5,7 @@
  * /sitemap.xml에 접속하면 다음 URL들이 포함된 XML이 반환됩니다:
  *
  * - 홈 페이지 (우선순위: 1.0)
- * - 카테고리 페이지 5개 (우선순위: 0.8)
+ * - 카테고리 페이지 4개 (우선순위: 0.8)
  * - 코스 상세 페이지들 (우선순위: 0.6)
  *
  * Phase 5에서 실제 Notion API로 상세 페이지 목록을 동적으로 생성하도록 변경될 예정입니다.
@@ -27,10 +27,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 1.0,
   };
 
-  // 2. 카테고리 페이지 (5개 구간)
-  const categories = ["동해안", "남해안", "서해안", "DMZ", "지리산"];
+  // 2. 카테고리 페이지 (4개 구간)
+  const categories = ["해파랑길", "남파랑길", "서해랑길", "DMZ 평화의 길"];
   const categoryEntries: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${baseUrl}/${categoryToSlug(category)}`,
+    url: `${baseUrl}/${encodeURIComponent(category)}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
@@ -38,7 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 3. 상세 페이지 (Mock 데이터 기반, Phase 5에서 실제 Notion API로 변경)
   const detailEntries: MetadataRoute.Sitemap = MOCK_POSTS.map((post) => ({
-    url: `${baseUrl}/${categoryToSlug(post.category)}/${post.slug}`,
+    url: `${baseUrl}/${encodeURIComponent(post.category)}/${post.slug}`,
     lastModified: new Date(post.date),
     changeFrequency: "monthly" as const,
     priority: 0.6,
