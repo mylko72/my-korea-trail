@@ -41,6 +41,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PrevNextNavigation } from "@/components/trail/PrevNextNavigation";
 import { ShareButton } from "@/components/trail/share-button";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   Calendar,
@@ -52,6 +53,17 @@ import {
   XCircle,
   Star,
 } from "lucide-react";
+
+// TrailMap 컴포넌트는 클라이언트 사이드에서만 렌더링되므로 동적 로딩을 사용합니다
+// Google Maps 라이브러리 용량이 크므로 지연 로딩으로 성능 최적화합니다
+const TrailMap = dynamic(() => import("@/components/map/TrailMap"), {
+  loading: () => (
+    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted border border-border flex flex-col items-center justify-center gap-3 animate-pulse">
+      <div className="h-8 w-8 rounded-full bg-muted-foreground/20" />
+      <div className="h-4 w-32 rounded bg-muted-foreground/20" />
+    </div>
+  ),
+});
 
 // =====================================================
 // Mock 본문 콘텐츠 (Phase 3: UI 개발용)
@@ -433,10 +445,10 @@ export default async function CourseDetailPage({
 
         {/* -------------------------------------------------------
             지도 영역 (F007: Google Maps 연동)
-            Phase 5에서 실제 Google Maps 컴포넌트로 대체됩니다.
-            좌표 정보가 없는 경우 지도 영역을 숨깁니다.
+            TrailMap 컴포넌트로 시작점/종료점 마커를 표시합니다.
+            좌표 정보가 모두 있는 경우에만 지도를 렌더링합니다.
             ------------------------------------------------------- */}
-        {(post.startLocation ?? post.endLocation) && (
+        {post.startLocation && post.endLocation && (
           <section
             className="mb-10"
             aria-labelledby="map-section-title"
@@ -449,56 +461,27 @@ export default async function CourseDetailPage({
               코스 지도
             </h2>
 
-            {/* Google Maps 플레이스홀더 (Phase 5에서 TrailMap 컴포넌트로 교체) */}
-            <div
-              className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted border border-border flex flex-col items-center justify-center gap-3"
-              role="img"
-              aria-label={`${post.title} 코스 지도 (준비 중)`}
-            >
-              <MapPin
-                className="h-10 w-10 text-muted-foreground/40"
-                aria-hidden="true"
-              />
-              <div className="text-center">
-                <p className="text-sm font-medium text-muted-foreground">
-                  지도 준비 중
-                </p>
-                <p className="text-xs text-muted-foreground/60 mt-1">
-                  Google Maps API 연동 후 표시됩니다
-                </p>
-              </div>
-
-              {/* 좌표 정보 미리보기 (개발 참고용) */}
-              {process.env.NODE_ENV === "development" && (
-                <div className="absolute bottom-3 left-3 text-xs text-muted-foreground/50 font-mono">
-                  {post.startLocation && (
-                    <span>
-                      시작: {post.startLocation.lat.toFixed(4)},{" "}
-                      {post.startLocation.lng.toFixed(4)}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Google Maps 컴포넌트 (TrailMap) */}
+            <TrailMap
+              startLocation={post.startLocation}
+              endLocation={post.endLocation}
+              title={post.title}
+            />
 
             {/* 지도 하단 출발/도착 정보 */}
             <div className="flex items-center justify-between mt-3 text-sm text-muted-foreground">
-              {post.startLocation && (
-                <span className="flex items-center gap-1.5">
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-bold">
-                    S
-                  </span>
-                  {post.startLocation.name ?? "출발지"}
+              <span className="flex items-center gap-1.5">
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-bold">
+                  S
                 </span>
-              )}
-              {post.endLocation && (
-                <span className="flex items-center gap-1.5">
-                  {post.endLocation.name ?? "도착지"}
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500/15 text-red-600 dark:text-red-400 text-xs font-bold">
-                    E
-                  </span>
+                {post.startLocation.name ?? "출발지"}
+              </span>
+              <span className="flex items-center gap-1.5">
+                {post.endLocation.name ?? "도착지"}
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500/15 text-red-600 dark:text-red-400 text-xs font-bold">
+                  E
                 </span>
-              )}
+              </span>
             </div>
           </section>
         )}

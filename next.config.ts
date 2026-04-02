@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      // 사용자 커스텀 이미지 호스트 (Notion CoverImage URL 필드 사용)
+      {
+        protocol: "https",
+        hostname: "www.durunubi.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "durunubi.kr",
+      },
     ],
   },
 };
