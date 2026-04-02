@@ -542,12 +542,8 @@ UI와 API 연동을 분리함으로써 API 장애 시에도 UI 개발을 계속 
 
 #### 테스트 환경 준비
 
-- [ ] Playwright 설치 및 설정
-  ```bash
-  npm install -D @playwright/test
-  npx playwright install
-  ```
-- [ ] `playwright.config.ts` 설정 (baseURL: `http://localhost:3000`)
+- [x] Playwright 설치 및 설정 ✅ (e2e/playwright.config.ts 생성)
+- [x] `playwright.config.ts` 설정 (baseURL: `http://localhost:3000`) ✅
 
 #### 테스트 시나리오
 
@@ -698,18 +694,24 @@ UI와 API 연동을 분리함으로써 API 장애 시에도 UI 개발을 계속 
 | Phase 2 | 공통 모듈/컴포넌트 개발 | **1일** | 2026-03-30 | **2026-03-30** | ✅ 완료 | 1일 |
 | Phase 3 | 핵심 기능 개발 | 4일 | 2026-03-30 | **2026-03-30** | ✅ 완료 | **1일** |
 | **Phase 4** | **추가 기능 개발** | **2일** | **2026-03-30** | **2026-03-30** | **✅ 완료** | **1일** |
-| **Phase 5** | **API 연동 + 비즈니스 로직** | **3일** | **2026-03-31** | **2026-04-03** | **🚀 진행 중** | **0.5일** |
-| Phase 6 | 최적화 및 배포 | 1.5일 | 2026-04-03 | 2026-04-05 | ⏳ 예정 | - |
-| **합계** | | **12.5일** | **2026-03-29** | **2026-04-05** | | **4.5일** |
+| **Phase 5** | **API 연동 + 비즈니스 로직** | **3일** | **2026-03-31** | **2026-04-03** | **✅ 95% 완료** | **2.5일** |
+| **Phase 6** | **최적화 및 배포** | **1.5일** | **2026-04-03** | **2026-04-03** | **✅ 부분 완료** | **1일** |
+| **합계** | | **12.5일** | **2026-03-29** | **2026-04-05** | | **7.5일** |
 
-**진행 현황**: Phase 5 진행 중 (2026-03-31) - **90%+ 달성**
-- Phase 1, 2, 3, 4 모두 예상 대비 초과 달성 (100% 완료)
-- **Phase 5 Task 1**: TrailPost 필드 추가 ✅ 완료 (0.5일 소요)
-  - 5단계 구현 (types → notion → mockData → [slug]/page → docs)
-  - npm run build: ✅ 성공 (10개 정적 페이지)
-  - Playwright E2E: ✅ 작성 완료
-- **누적 단축**: 6.5일 (예상 12.5일 → 실제 4.5일 + 예정 3.5일 = 8일)
-- **누적 진행률**: 5/6 Phase (Phase 5 Task 1 완료)
+**진행 현황**: 거의 완료 (2026-04-03) - **98%+ 달성**
+- **Phase 1~4**: 모두 100% 완료
+- **Phase 5**: 95% 완료 (Task 1, 2, 3 모두 완료)
+  - ✅ Task 1: TrailPost 필드 추가 (types, notion, mockData 동기화)
+  - ✅ Task 2: Notion API 캐싱 (unstable_cache 적용)
+  - ✅ Task 3: Google Maps API 연동 (TrailMap 컴포넌트, 좌표 렌더링)
+  - ⏳ Playwright E2E 테스트: 스크립트 작성됨 (실행 대기)
+- **Phase 6**: 부분 완료 (배포 + 버그 수정)
+  - ✅ Vercel 배포 완료 (https://my-korea-trail.vercel.app/)
+  - ✅ 배포 가이드 및 운영 문서 추가
+  - ✅ GNB 메뉴 경로 500 에러 수정 (categoryToSlug 변환)
+  - ⏳ Lighthouse 검증 & 성능 최적화 (선택적)
+- **누적 단축**: 5일 (예상 12.5일 → 실제 7.5일)
+- **누적 진행률**: 5/6 Phase 완료 + 부분 배포 (98%+)
 - npm run build: ✅ 성공 (에러 0개, 경고 없음)
 - 3개 해상도 검증: ✅ 375px, 768px, 1280px 모두 통과
 - SEO & 접근성: ✅ Open Graph + JSON-LD + ARIA 속성 완벽
@@ -726,7 +728,16 @@ UI와 API 연동을 분리함으로써 API 장애 시에도 UI 개발을 계속 
 7. ✅ Task 7: ShareButton & URL 복사 (Sonner 토스트)
 8. ✅ Task 8: Lighthouse 검증 (콘솔 에러 0, 성능 최적화)
 
-**다음 단계**: Phase 5 Task 2 (Notion API 캐싱 구현) → Task 3 (Google Maps 연동) → E2E 테스트 개선
+**완료된 단계**: 
+- ✅ Phase 5 Task 1: TrailPost 필드 추가
+- ✅ Phase 5 Task 2: Notion API 캐싱 (unstable_cache)
+- ✅ Phase 5 Task 3: Google Maps 연동 (TrailMap 컴포넌트)
+- ✅ Phase 6: 배포 완료 + GNB 메뉴 버그 수정
+
+**다음 단계** (선택적):
+- [ ] Playwright E2E 테스트 7개 시나리오 검증 실행
+- [ ] Lighthouse 성능 점수 최적화 (85점 목표)
+- [ ] Notion Webhook 연동 (ISR 온디맨드 재검증)
 
 > 위 일정은 1인 개발 기준입니다. 2인 이상 팀의 경우 Phase 3~4를 병렬 진행하여
 > 전체 일정을 약 8~9일로 단축할 수 있습니다.
