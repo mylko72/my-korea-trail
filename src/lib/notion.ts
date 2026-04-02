@@ -25,9 +25,39 @@ import type {
 } from "./types";
 
 // =====================================================
-// Notion 클라이언트 초기화
-// 환경 변수가 없으면 런타임에서 에러가 발생합니다.
+// Notion 클라이언트 초기화 및 환경 변수 검증
 // =====================================================
+
+/**
+ * 환경 변수 검증 함수
+ * 필수 환경 변수가 미설정인 경우 명확한 에러 메시지를 출력합니다.
+ */
+function validateEnvironmentVariables() {
+  const token = process.env.NOTION_API_TOKEN;
+  const databaseId = process.env.NOTION_DATABASE_ID;
+
+  const missingVars: string[] = [];
+  if (!token) missingVars.push("NOTION_API_TOKEN");
+  if (!databaseId) missingVars.push("NOTION_DATABASE_ID");
+
+  if (missingVars.length > 0) {
+    console.error(
+      `\n❌ [Notion API] 필수 환경 변수 미설정:\n` +
+      `   ${missingVars.join(", ")}\n` +
+      `\n📝 해결 방법:\n` +
+      `   1. 프로젝트 루트에 .env.local 파일 생성\n` +
+      `   2. 다음 내용 추가:\n` +
+      `      NOTION_API_TOKEN=ntn_xxxxxxxxxxxx\n` +
+      `      NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxx\n` +
+      `   3. Notion 개발자 페이지에서 토큰 발급: https://www.notion.so/my-integrations\n`
+    );
+  }
+}
+
+// 모듈 로드 시 환경 변수 검증
+if (process.env.NODE_ENV !== "test") {
+  validateEnvironmentVariables();
+}
 
 const notion = new Client({
   auth: process.env.NOTION_API_TOKEN,
@@ -153,6 +183,8 @@ function filterByDatabase(results: any[]): any[] {
  * 전체 게시글 목록을 가져옵니다.
  * Published=true인 항목만 반환하며, 날짜 내림차순으로 정렬됩니다.
  *
+ * 캐싱: getCachedAllPosts()로 래핑되어 60초 주기로 재검증됩니다.
+ *
  * @param options - 페이지네이션 및 필터 옵션
  * @returns 게시글 목록과 페이지네이션 정보
  */
@@ -161,6 +193,7 @@ export async function getAllPosts(options?: {
   cursor?: string;
   pageSize?: number;
 }): Promise<PaginatedResult<TrailPost>> {
+  const startTime = performance.now();
   try {
     const { category, cursor, pageSize = 10 } = options ?? {};
 
@@ -192,13 +225,28 @@ export async function getAllPosts(options?: {
       return dateB.localeCompare(dateA);
     });
 
-    return {
+    const result = {
       items: pages.map(mapPageToTrailPost),
       nextCursor: response.next_cursor ?? undefined,
       hasMore: response.has_more,
     };
+
+    // 성능 로깅 (개발 환경)
+    if (process.env.NODE_ENV === "development") {
+      const duration = performance.now() - startTime;
+      console.log(
+        `[Notion API] getAllPosts(category=${category ?? "all"}) ` +
+        `결과: ${result.items.length}개 항목, 소요시간: ${duration.toFixed(2)}ms`
+      );
+    }
+
+    return result;
   } catch (error) {
-    console.error("[Notion API] getAllPosts 에러:", error);
+    const duration = performance.now() - startTime;
+    console.error(
+      `[Notion API] getAllPosts 에러 (${duration.toFixed(2)}ms):`,
+      error instanceof Error ? error.message : String(error)
+    );
     // 에러 발생 시 빈 배열 반환 (폴백)
     return {
       items: [],
@@ -224,35 +272,46 @@ export async function getPostsByCategory(
 /**
  * 슬러그(slug)로 특정 게시글을 가져옵니다.
  *
- * @param slug - 게시글 슬러그
+ * 캐싱: getCachedPostBySlug()로 래핑되어 300초(5분) 주기로 재검증됩니다.
+ *
+ * @param slug - 게시글 슬러그 (또는 page.id)
  * @returns TrailPost 또는 null (없을 경우)
+ *
+ * 주의: notion.search()는 텍스트 기반 부분 일치 검색이므로
+ * UUID slug의 경우 부정확한 결과를 반환할 수 있습니다.
+ * 따라서 전체 게시글을 가져온 후 정확한 일치로 검색합니다.
  */
 export async function getPostBySlug(
   slug: string
 ): Promise<TrailPost | null> {
+  const startTime = performance.now();
   try {
-    // 슬러그로 검색합니다
-    const response = await notion.search({
-      query: slug,
-      filter: { value: "page", property: "object" },
-      page_size: 10,
-    });
-
-    const pages = filterByDatabase(response.results);
+    // 전체 게시글 가져오기 (notion.search 대신 getAllPosts 사용)
+    // UUID 기반 검색의 부정확성 문제를 해결합니다.
+    const result = await getAllPosts({ pageSize: 100 });
 
     // 정확한 슬러그 일치 항목을 찾습니다
-    const matched = pages.find((page) => {
-      const pageSlug =
-        extractPlainText(page.properties?.Slug?.rich_text ?? []) || page.id;
-      return (
-        pageSlug === slug && page.properties?.Published?.checkbox === true
-      );
+    const matched = result.items.find((post) => {
+      return post.slug === slug;
     });
 
+    // 성능 로깅 (개발 환경)
+    if (process.env.NODE_ENV === "development") {
+      const duration = performance.now() - startTime;
+      const status = matched ? "✓" : "✗";
+      console.log(
+        `[Notion API] getPostBySlug("${slug}") ${status} (${duration.toFixed(2)}ms)`
+      );
+    }
+
     if (!matched) return null;
-    return mapPageToTrailPost(matched);
+    return matched;
   } catch (error) {
-    console.error(`[Notion API] getPostBySlug("${slug}") 에러:`, error);
+    const duration = performance.now() - startTime;
+    console.error(
+      `[Notion API] getPostBySlug("${slug}") 에러 (${duration.toFixed(2)}ms):`,
+      error instanceof Error ? error.message : String(error)
+    );
     // 에러 발생 시 null 반환 (404 페이지로 유도)
     return null;
   }
@@ -262,18 +321,35 @@ export async function getPostBySlug(
  * 특정 Notion 페이지의 블록 콘텐츠를 가져옵니다.
  * 게시글 본문 렌더링에 사용합니다.
  *
+ * 캐싱: getCachedPageBlocks()로 래핑되어 3600초(1시간) 주기로 재검증됩니다.
+ *
  * @param pageId - Notion 페이지 ID
  * @returns 블록 배열
  */
 export async function getPageBlocks(pageId: string) {
+  const startTime = performance.now();
   try {
     const response = await notion.blocks.children.list({
       block_id: pageId,
       page_size: 100,
     });
+
+    // 성능 로깅 (개발 환경)
+    if (process.env.NODE_ENV === "development") {
+      const duration = performance.now() - startTime;
+      console.log(
+        `[Notion API] getPageBlocks("${pageId.slice(0, 8)}...") ` +
+        `결과: ${response.results.length}개 블록, 소요시간: ${duration.toFixed(2)}ms`
+      );
+    }
+
     return response.results;
   } catch (error) {
-    console.error(`[Notion API] getPageBlocks("${pageId}") 에러:`, error);
+    const duration = performance.now() - startTime;
+    console.error(
+      `[Notion API] getPageBlocks("${pageId.slice(0, 8)}...") 에러 (${duration.toFixed(2)}ms):`,
+      error instanceof Error ? error.message : String(error)
+    );
     // 에러 발생 시 빈 배열 반환 (본문 없음)
     return [];
   }
@@ -296,12 +372,22 @@ export async function getAllCategories(): Promise<TrailCategory[]> {
 }
 
 // =====================================================
-// 캐싱 래핑 함수 (unstable_cache)
+// 캐싱 래핑 함수 (Next.js unstable_cache)
 //
-// Notion API 초당 3회 요청 한도를 대응하기 위해
-// Next.js unstable_cache로 결과를 캐싱합니다.
-// - revalidate: 캐시 재검증 주기 (초 단위)
-// - tags: 온디맨드 캐시 무효화를 위한 태그
+// Notion API 특성과 대응 전략:
+// 1. 초당 3회 요청 한도 → unstable_cache로 중복 요청 방지
+// 2. 다양한 변경 빈도 → 함수별 다른 revalidate 주기 설정
+// 3. 온디맨드 무효화 → tags를 사용한 선택적 캐시 무효화 가능
+//
+// 캐시 재검증 전략:
+// - getAllPosts/getPostsByCategory: 60초 (변경 빈도 높음)
+// - getPostBySlug: 300초 (상세 페이지, 변경 빈도 낮음)
+// - getPageBlocks: 3600초 (본문 콘텐츠, 거의 변경 없음)
+// - getAllCategories: 3600초 (고정 값, 변경 불가)
+//
+// 성능 로깅:
+// - 개발 환경(NODE_ENV=development)에서는 각 API 호출 로그 출력
+// - 프로덕션 환경에서는 로깅 비활성화 (성능 최적화)
 //
 // 기존 원본 함수(getAllPosts, getPostsByCategory 등)는
 // 레거시 호환성을 위해 그대로 유지됩니다.

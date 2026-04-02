@@ -155,3 +155,19 @@ export interface MapMarker {
   /** 연결된 게시글 (선택) */
   post?: Pick<TrailPost, "id" | "title" | "slug" | "category">;
 }
+
+// =====================================================
+// 검색 API 관련 타입
+// =====================================================
+
+/** 검색 API 응답 타입 */
+export interface SearchResponse {
+  /** 검색 결과 게시글 배열 */
+  posts: TrailPost[];
+  /** 검색 결과 총 개수 */
+  total: number;
+  /** 검색어 */
+  query: string;
+  /** 필터링된 카테고리 (없으면 전체) */
+  category?: TrailCategory;
+}
