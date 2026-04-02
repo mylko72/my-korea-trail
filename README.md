@@ -109,6 +109,27 @@ NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+#### ⚠️ Notion 이미지 URL 만료 경고
+
+Notion 내부 업로드 파일의 이미지 URL은 **1시간 후 만료**되어 프로덕션 환경에서 이미지가 깨질 수 있습니다.
+
+**권장 대응 방안 (필수):**
+
+1. **외부 이미지 서비스 사용 (CoverImage, Images 필드)**
+   - ✅ Unsplash: `https://images.unsplash.com/...`
+   - ✅ Cloudinary: `https://res.cloudinary.com/...`
+   - ✅ Imgur: `https://imgur.com/...`
+   - ❌ Notion 내부 파일 업로드 (회피)
+
+2. **Notion 웹 클립 사용**
+   - CoverImage 필드에서 "Link to a web page" 선택 후 외부 이미지 URL 입력
+
+3. **ISR 재검증 주기**
+   - 현재 설정: 카테고리/상세 페이지 **1분(60초)** ISR 적용
+   - Notion 이미지 만료(1시간)보다 짧아서 대부분 이미지 로드됨
+
+더 자세한 정보는 [Notion 데이터베이스 설정 가이드](./docs/NOTION_DATABASE_SETUP.md#q-notion-이미지가-1시간-후-깨지는데-어떻게-해야-하나요) FAQ를 참고하세요.
+
 > **주의사항**
 > - `.env.local`은 `.gitignore`에 등재되어 커밋되지 않습니다.
 > - 토큰 유출 시 즉시 Notion/Google Cloud에서 재발급하세요.
@@ -246,9 +267,94 @@ NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+## 🔍 검색 API (F006)
+
+### GET /api/search
+
+게시글을 검색하는 REST API입니다. 제목, 카테고리, 설명에서 검색어를 찾습니다.
+
+**쿼리 파라미터:**
+- `q` (필수): 검색어
+- `category` (선택): 카테고리로 필터링 (예: `해파랑길`, `남파랑길`)
+
+**응답:**
+```json
+{
+  "posts": [
+    { "id": "...", "title": "...", "category": "해파랑길", ... }
+  ],
+  "total": 3,
+  "query": "강릉",
+  "category": "해파랑길"
+}
+```
+
+**사용 예시:**
+```bash
+# 모든 게시글에서 "강릉" 검색
+curl "http://localhost:3000/api/search?q=강릉"
+
+# 해파랑길 카테고리에서 "해수욕장" 검색
+curl "http://localhost:3000/api/search?q=해수욕장&category=해파랑길"
+```
+
+**클라이언트 사용 예시 (선택사항):**
+```typescript
+const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+const data = await response.json();
+console.log(data.posts); // 검색 결과 게시글 배열
+```
+
+**캐싱 전략:**
+- 검색어별로 캐싱하지 않음 (동적 쿼리)
+- Notion API 데이터는 60초 주기로 캐싱됨 (getCachedAllPosts)
+
+---
+
+## ⚡ API 캐싱 전략
+
+Notion API는 초당 3회 요청 제한이 있으므로, Next.js의 `unstable_cache`를 통해 다음과 같이 최적화합니다:
+
+### 캐싱 재검증 주기
+
+| 함수 | 재검증 주기 | 사유 |
+|------|-----------|------|
+| `getCachedAllPosts()` | **60초** | 새 게시글 추가 시 빠른 반영 필요 |
+| `getCachedPostsByCategory()` | **60초** | 카테고리별 목록 동기화 필요 |
+| `getCachedPostBySlug()` | **300초** (5분) | 상세 페이지 변경 빈도 낮음 |
+| `getCachedPageBlocks()` | **3600초** (1시간) | 본문 콘텐츠 거의 변경 없음 |
+| `getCachedAllCategories()` | **3600초** (1시간) | 카테고리 목록 고정 값 |
+
+### 에러 처리
+
+- **환경 변수 미설정**: 명확한 에러 메시지 출력 후 Mock 데이터로 폴백
+- **API 호출 실패**: 자동 재시도 및 이전 캐시된 데이터 사용 (stale-while-revalidate 패턴)
+- **성능 로깅**: 개발 환경(NODE_ENV=development)에서 API 호출 시간 기록
+
+### 성능 최적화
+
+```bash
+# 개발 환경에서 API 호출 로그 보기
+npm run dev
+
+# 프로덕션 빌드 및 성능 검증
+npm run build
+npm run start
+```
+
+개발 콘솔에서 다음과 같은 로그를 확인할 수 있습니다:
+```
+[Notion API] getAllPosts(category=all) 결과: 11개 항목, 소요시간: 234.56ms
+[Notion API] getPostBySlug("gangneung-samcheok") ✓ (45.23ms)
+```
+
+자세한 캐싱 구현은 [`src/lib/notion.ts`](./src/lib/notion.ts)를 참고하세요.
+
 ## 📚 참고 문서
 
 - [PRD 문서](./docs/PRD.md) - 제품 요구사항 명세서
+- [ROADMAP 문서](./docs/ROADMAP.md) - 개발 로드맵 및 Phase별 작업
+- [Notion 데이터베이스 설정 가이드](./docs/NOTION_DATABASE_SETUP.md) - Notion DB 구성 방법
 - [Notion API 공식 문서](https://developers.notion.com)
 - [Google Maps API 공식 문서](https://developers.google.com/maps)
 - [Next.js 공식 문서](https://nextjs.org/docs)

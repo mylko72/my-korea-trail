@@ -694,6 +694,25 @@ title: extractPlainText(props["Course Title"]?.title ?? []),
 
 ---
 
-**Version**: 1.0
-**Last Updated**: 2026-03-31
-**Related**: ROADMAP.md (Phase 5: API 연동), PRD.md (데이터 모델)
+## 🔄 ISR 재검증 주기
+
+현재 프로젝트는 Next.js ISR(Incremental Static Regeneration)을 통해 이미지 URL 만료 문제를 완화합니다:
+
+| 페이지 | 재검증 주기 | 대응 | 비고 |
+|--------|-----------|------|------|
+| 홈 페이지 | 1분 | ✅ | Notion API 캐시 60초 + ISR 1분 |
+| 카테고리 페이지 | 1분 | ✅ | 최신 게시글 빠르게 반영 |
+| 상세 페이지 | 1분 | ✅ | 이미지 새로고침 자동 |
+| Notion 이미지 만료 | 1시간 | ⚠️ | 외부 URL 사용 권장 |
+
+**결론**: ISR이 1분이므로 Notion 이미지 만료(1시간)보다 훨씬 자주 갱신되어 대부분 이미지 로드됩니다.
+
+---
+
+**Version**: 1.1
+**Last Updated**: 2026-04-02 (Phase 5 Task 3: 이미지 URL 만료 대응 추가)
+**Related**: 
+- ROADMAP.md (Phase 5: API 연동)
+- PRD.md (데이터 모델)
+- README.md (환경 변수 설정)
+- src/app/api/image/route.ts (선택적 이미지 프록시)
