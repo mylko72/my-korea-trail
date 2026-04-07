@@ -474,3 +474,99 @@ export const getCachedAllCategories = unstable_cache(
   ["all-categories"],
   { revalidate: 3600, tags: ["all-categories"] }
 );
+
+// =====================================================
+// 관리자용 함수 (Phase 7)
+// Published 필터 없이 전체 코스를 조회하고, 상태를 업데이트합니다.
+// =====================================================
+
+/**
+ * 관리자용: Published 필터 없이 전체 코스 조회
+ *
+ * 캐싱을 적용하지 않습니다 (관리자는 항상 최신 데이터 필요).
+ * 날짜 내림차순으로 정렬됩니다.
+ *
+ * @returns AdminCourseRow[] - 관리자 테이블용 간소화된 데이터
+ */
+export async function getAllPostsForAdmin(): Promise<
+  Array<{
+    id: string;
+    title: string;
+    category: TrailCategory;
+    date: string;
+    distance: number;
+    completed: boolean;
+    published: boolean;
+  }>
+> {
+  try {
+    const results = await notion.search({
+      filter: { property: 'object', value: 'page' },
+      sort: { direction: 'descending', timestamp: 'last_edited_time' },
+    });
+
+    const filtered = filterByDatabase(results.results);
+    const posts = filtered.map((page) => mapPageToTrailPost(page));
+
+    // AdminCourseRow 형태로 변환
+    return posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      category: post.category,
+      date: post.date,
+      distance: post.distance ?? 0,
+      completed: post.completed ?? false,
+      published: post.published,
+    }));
+  } catch (error) {
+    console.error('[Notion] getAllPostsForAdmin 에러:', error);
+    throw new Error('코스 목록 조회 실패');
+  }
+}
+
+/**
+ * Notion 페이지 상태 업데이트
+ *
+ * Completed (라디오: "완보" | "미완") 또는
+ * Published (체크박스: true | false) 필드를 업데이트합니다.
+ *
+ * @param pageId - Notion 페이지 ID
+ * @param field - 업데이트할 필드 ('completed' | 'published')
+ * @param value - 업데이트할 값 (boolean)
+ * @returns 업데이트 결과
+ */
+export async function updateCourseStatus(
+  pageId: string,
+  field: 'completed' | 'published',
+  value: boolean
+): Promise<{ success: true; pageId: string; field: string; value: boolean }> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const properties: Record<string, any> = {};
+
+    if (field === 'completed') {
+      // Completed 필드: Select 타입 (\"완보\" | \"미완\")
+      properties.Completed = {
+        select: { name: value ? '완보' : '미완' },
+      };
+    } else if (field === 'published') {
+      // Published 필드: Checkbox 타입
+      properties.Published = {
+        checkbox: value,
+      };
+    }
+
+    await notion.pages.update({
+      page_id: pageId,
+      properties,
+    });
+
+    return { success: true, pageId, field, value };
+  } catch (error) {
+    console.error(
+      `[Notion] updateCourseStatus 에러 (${field}):`,
+      error
+    );
+    throw new Error(`상태 업데이트 실패: ${field}`);
+  }
+}

@@ -171,3 +171,41 @@ export interface SearchResponse {
   /** 필터링된 카테고리 (없으면 전체) */
   category?: TrailCategory;
 }
+
+// =====================================================
+// 관리자 기능 관련 타입 (Phase 7)
+// =====================================================
+
+/**
+ * 관리자 테이블에서 표시할 코스 정보 (간소화 버전)
+ * TrailPost의 필드 중 관리자에게 필요한 것만 포함
+ */
+export interface AdminCourseRow {
+  /** Notion 페이지 고유 ID (PATCH 요청에 사용) */
+  id: string;
+  /** 코스명 */
+  title: string;
+  /** 카테고리 */
+  category: TrailCategory;
+  /** 완주일 (ISO 8601 형식) */
+  date: string;
+  /** 거리 (km) */
+  distance: number;
+  /** 완보 여부 (true=완보, false=미완) */
+  completed: boolean;
+  /** 게시 여부 (true=게시됨, false=미게시) */
+  published: boolean;
+}
+
+/**
+ * 관리자 API PATCH 요청 본문 타입
+ * 코스 상태(완보/게시) 업데이트 시 사용
+ */
+export interface UpdateCourseStatusPayload {
+  /** 업데이트할 Notion 페이지 ID */
+  pageId: string;
+  /** 업데이트할 필드명 ('completed' | 'published') */
+  field: 'completed' | 'published';
+  /** 업데이트할 값 (boolean) */
+  value: boolean;
+}

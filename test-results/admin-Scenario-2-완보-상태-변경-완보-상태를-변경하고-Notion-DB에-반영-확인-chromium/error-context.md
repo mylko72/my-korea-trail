@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - link "본문으로 바로가기" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "코리아 둘레길" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - generic [ref=e9]: 코리아 둘레길
+      - navigation "주요 네비게이션" [ref=e10]:
+        - link "홈" [ref=e11] [cursor=pointer]:
+          - /url: /
+        - link "해파랑길" [ref=e12] [cursor=pointer]:
+          - /url: /hae-parang-gil
+        - link "남파랑길" [ref=e13] [cursor=pointer]:
+          - /url: /nam-parang-gil
+        - link "서해랑길" [ref=e14] [cursor=pointer]:
+          - /url: /seo-hae-rang-gil
+        - link "DMZ 평화의 길" [ref=e15] [cursor=pointer]:
+          - /url: /dmz-peace-trail
+      - button "다크 모드로 전환" [ref=e17]:
+        - img
+  - main [ref=e18]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: 관리자 로그인
+        - generic [ref=e23]: 코리아 둘레길 기록 블로그 관리자 전용
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - text: 패스워드
+          - textbox "패스워드" [active] [ref=e27]:
+            - /placeholder: 패스워드를 입력하세요
+        - button "로그인" [ref=e28]
+        - paragraph [ref=e29]: 관리자 패스워드가 필요합니다
+  - contentinfo [ref=e30]:
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - img [ref=e34]
+          - generic [ref=e37]: 코리아 둘레길
+        - navigation "카테고리 링크" [ref=e38]:
+          - link "해파랑길" [ref=e39] [cursor=pointer]:
+            - /url: /해파랑길
+          - link "남파랑길" [ref=e40] [cursor=pointer]:
+            - /url: /남파랑길
+          - link "서해랑길" [ref=e41] [cursor=pointer]:
+            - /url: /서해랑길
+          - link "DMZ 평화의 길" [ref=e42] [cursor=pointer]:
+            - /url: /DMZ%20평화의%20길
+        - link "GitHub 저장소로 이동" [ref=e43] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e44]
+          - generic [ref=e47]: GitHub
+      - paragraph [ref=e49]: © 2026 코리아 둘레길. All rights reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e55] [cursor=pointer]:
+    - generic [ref=e58]:
+      - text: Compiling
+      - generic [ref=e59]:
+        - generic [ref=e60]: .
+        - generic [ref=e61]: .
+        - generic [ref=e62]: .
+  - alert [ref=e63]
+```
