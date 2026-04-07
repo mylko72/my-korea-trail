@@ -3,6 +3,12 @@ import { test, expect } from '@playwright/test';
 /**
  * Phase 9 E2E 테스트: 관리자 기능 검증
  *
+ * ⚠️ 이 테스트는 프로덕션(Vercel)에서 실행하는 것을 권장합니다.
+ * 로컬에서 실행하려면 다음을 설정하세요:
+ * - .env.local에 ADMIN_PASSWORD 설정
+ * - npm run dev로 개발 서버 실행
+ * - npm run test:e2e 실행
+ *
  * 5개 시나리오:
  * 1. 대시보드 접근 및 테이블 로드
  * 2. 완보 상태 변경 (UI+Notion DB)
@@ -11,12 +17,23 @@ import { test, expect } from '@playwright/test';
  * 5. 반응형 및 접근성
  */
 
+// ADMIN_PASSWORD 환경변수가 없으면 모든 테스트 스킵
+const hasAdminPassword = !!process.env.ADMIN_PASSWORD;
+test.describe.configure({ mode: 'parallel' });
+
 // =====================================================
 // Scenario 1: 대시보드 접근 및 테이블 로드
 // =====================================================
 
 test.describe('Scenario 1: 관리자 대시보드 접근', () => {
   test('로그인 후 /admin 접속 시 테이블 로드 확인', async ({ page }) => {
+    // 0. 환경변수 확인
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    if (!process.env.ADMIN_PASSWORD) {
+      test.skip();
+      return;
+    }
+
     // 1. 로그인 페이지 접속
     await page.goto('/auth/login');
     await page.waitForLoadState('networkidle');
@@ -24,11 +41,11 @@ test.describe('Scenario 1: 관리자 대시보드 접근', () => {
     // 2. 패스워드 입력 및 로그인
     const passwordInput = page.locator('input[type="password"]');
     await expect(passwordInput).toBeVisible();
-    await passwordInput.fill(process.env.ADMIN_PASSWORD || '');
+    await passwordInput.fill(adminPassword);
 
     const loginButton = page.locator('button:has-text("로그인")');
-    await loginButton.click();
-    await page.waitForLoadState('networkidle');
+    await loginButton.click({ timeout: 5000 });
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
 
     // 3. /admin 페이지로 자동 리다이렉트됨
     expect(page.url()).toContain('/admin');
