@@ -21,11 +21,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CategoryFilter } from "@/components/trail/CategoryFilter";
+import { CourseNumberFilter } from "@/components/trail/CourseNumberFilter";
 import { DateFilter } from "@/components/trail/DateFilter";
 import { PostGrid } from "@/components/trail/PostGrid";
 import {
-  filterPostsByCategory,
   filterByDateRange,
 } from "@/lib/mockData";
 import type { TrailPost, TrailCategory } from "@/lib/types";
@@ -62,11 +61,6 @@ export function CategoryPageClient({
   // 필터 상태 관리
   // =====================================================
 
-  /** 카테고리 필터: null이면 현재 카테고리 전체 표시 */
-  const [selectedCategory, setSelectedCategory] = useState<TrailCategory | null>(
-    currentCategory
-  );
-
   /** 날짜 필터: 시작일 */
   const [fromDate, setFromDate] = useState<string | undefined>(undefined);
 
@@ -77,22 +71,17 @@ export function CategoryPageClient({
   // 필터링 로직 (useMemo로 불필요한 재계산 방지)
   // =====================================================
 
-  /** 카테고리 + 날짜 필터가 적용된 최종 게시글 목록 */
+  /** 날짜 필터가 적용된 최종 게시글 목록 */
   const filteredPosts = useMemo(() => {
     let result = initialPosts;
 
-    // 1단계: 카테고리 필터 적용
-    if (selectedCategory) {
-      result = filterPostsByCategory(result, selectedCategory);
-    }
-
-    // 2단계: 날짜 범위 필터 적용
+    // 날짜 범위 필터 적용
     if (fromDate || toDate) {
       result = filterByDateRange(result, fromDate, toDate);
     }
 
     return result;
-  }, [initialPosts, selectedCategory, fromDate, toDate]);
+  }, [initialPosts, fromDate, toDate]);
 
   // =====================================================
   // 이벤트 핸들러
@@ -109,14 +98,12 @@ export function CategoryPageClient({
 
   /** 모든 필터 초기화 핸들러 */
   const handleResetFilters = useCallback(() => {
-    setSelectedCategory(currentCategory);
     setFromDate(undefined);
     setToDate(undefined);
-  }, [currentCategory]);
+  }, []);
 
   // 필터가 기본값에서 변경되었는지 확인
-  const hasActiveFilter =
-    selectedCategory !== currentCategory || Boolean(fromDate) || Boolean(toDate);
+  const hasActiveFilter = Boolean(fromDate) || Boolean(toDate);
 
   return (
     <div>
@@ -125,14 +112,24 @@ export function CategoryPageClient({
           CategoryFilter, DateFilter, 초기화 버튼으로 구성됩니다.
           ========================================================= */}
       <div className="mb-8 space-y-4 rounded-xl border border-border bg-card p-4 md:p-6">
-        {/* 카테고리 필터 (F004) */}
+        {/* 코스 필터 */}
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            카테고리
-          </h2>
-          <CategoryFilter
-            selected={selectedCategory}
-            onChange={setSelectedCategory}
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              코스 안내
+            </h2>
+            <span className="text-sm text-muted-foreground">
+              현재{" "}
+              <span className="font-medium text-foreground">
+                {initialPosts.filter(p => p.completed).length}개
+              </span>
+              의 코스를 완보했습니다.
+            </span>
+          </div>
+          <CourseNumberFilter
+            currentCategory={currentCategory}
+            categorySlug={categorySlug}
+            posts={initialPosts}
           />
         </div>
 
