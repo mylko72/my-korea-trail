@@ -52,6 +52,8 @@ export interface TrailPost {
   notionUrl?: string;
   /** 완보 여부 (true=완보, false=미완) */
   completed?: boolean;
+  /** 코스 소개 (Overview 필드) */
+  content1?: string;
   /** 코스 리뷰 (마크다운 텍스트) */
   content2?: string;
   /** 코스 사진 URL 목록 */

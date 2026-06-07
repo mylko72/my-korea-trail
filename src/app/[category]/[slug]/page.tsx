@@ -77,20 +77,6 @@ const TrailMap = dynamic(() => import("@/components/map/TrailMap"), {
 const BLUR_DATA_URL =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxmaWx0ZXIgaWQ9ImEiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuNCIgbnVtT2N0YXZlcz0iNSIgc2VlZD0iMiIgcmVzdWx0PSJub2lzZSIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCBmaWxsPSIjZTFkZWU2IiBmaWx0ZXI9InVybCgjYSkiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=";
 
-/** Mock 본문 콘텐츠 (Phase 5에서 Notion 블록으로 대체) */
-const MOCK_CONTENT1 = `
-강원도의 청정한 동해 바다를 끼고 걷는 이 구간은 코리아 둘레길 동해안길의 핵심 코스 중 하나입니다.
-강릉 경포해변에서 시작하여 주문진, 옥계를 거쳐 삼척까지 이어지는 약 33km의 여정은
-하루 종일 파도 소리와 함께 걷는 특별한 경험을 선사합니다.
-
-이 구간의 가장 큰 매력은 끊임없이 펼쳐지는 동해의 절경입니다. 맑은 날에는 수평선 너머로
-독도와 일본 열도의 윤곽이 보이기도 하며, 해안 절벽과 기암괴석이 만들어내는
-독특한 풍경은 걷는 내내 지루함을 느낄 틈을 주지 않습니다.
-
-해안선을 따라 이어진 데크 길과 자갈밭, 모래사장을 번갈아 걸으며
-강릉 특유의 해양 문화를 체험할 수 있습니다.
-`;
-
 const MOCK_CONTENT2 = `
 이 구간을 걸으면서 가장 기억에 남는 것은 역시 푸른 동해바다였습니다. 서울에서 생활하며
 잊고 있었던 자연의 위대함을 온몸으로 느낄 수 있었던 하루였습니다.
@@ -208,14 +194,9 @@ export default async function CourseDetailPage({
 
   // 게시글 데이터 조회 (Notion API 또는 Mock 데이터 폴백)
   let post: TrailPost | null = null;
-  let content1 = "";
 
   try {
     post = await getCachedPostBySlug(slug);
-    if (post) {
-      // Phase 5에서 실제 Notion 블록 콘텐츠로 대체됩니다
-      content1 = MOCK_CONTENT1;
-    }
   } catch {
     // Notion API 미설정 시 Mock 데이터로 대체합니다
   }
@@ -226,7 +207,6 @@ export default async function CourseDetailPage({
     const mockFallback = MOCK_POSTS.find((p) => p.slug === slug) ?? null;
     if (mockFallback) {
       post = mockFallback;
-      content1 = MOCK_CONTENT1;
     }
   }
 
@@ -494,7 +474,7 @@ export default async function CourseDetailPage({
             ------------------------------------------------------- */}
 
         {/* 코스 소개 (Content1) */}
-        {content1 && (
+        {post.content1 && (
           <section
             className="mb-10"
             aria-labelledby="content1-title"
@@ -505,21 +485,42 @@ export default async function CourseDetailPage({
             >
               코스 소개
             </h2>
-            {/* 마크다운 렌더러는 Phase 5에서 추가됩니다 */}
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              {content1.split("\n\n").filter(Boolean).map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="text-foreground/80 leading-relaxed mb-4 last:mb-0"
-                >
-                  {paragraph.trim()}
-                </p>
-              ))}
+              {post.content1.split("\n\n").filter(Boolean).map((block, blockIndex) => {
+                const lines = block.split("\n").filter(Boolean);
+                const isListBlock = lines.every((line) =>
+                  line.trim().startsWith("-") || line.trim().startsWith("•")
+                );
+
+                if (isListBlock && lines.length > 0) {
+                  return (
+                    <ul
+                      key={blockIndex}
+                      className="list-disc list-inside text-foreground/80 leading-relaxed mb-4 last:mb-0 space-y-2"
+                    >
+                      {lines.map((line, lineIndex) => (
+                        <li key={lineIndex}>
+                          {line.replace(/^[-•]\s*/, "").trim()}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+
+                return (
+                  <p
+                    key={blockIndex}
+                    className="text-foreground/80 leading-relaxed mb-4 last:mb-0"
+                  >
+                    {block.trim()}
+                  </p>
+                );
+              })}
             </div>
           </section>
         )}
 
-        {content1 && post.content2 && <Separator className="mb-10" />}
+        {post.content1 && post.content2 && <Separator className="mb-10" />}
 
         {/* 코스 리뷰 (Content2) */}
         {post.content2 ? (

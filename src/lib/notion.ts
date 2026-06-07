@@ -138,6 +138,7 @@ function mapPageToTrailPost(page: any): TrailPost {
     published: props.Published?.checkbox ?? false,
     notionUrl: page.url,
     completed: props.Completed?.select?.name === "완보",
+    content1: extractPlainText(props.Overview?.rich_text ?? []) || undefined,
     content2: extractPlainText(props.Content2?.rich_text ?? []) || undefined,
     images: (props.Images?.files ?? [])
       .map((f: NotionFile) => extractFileUrl(f))
